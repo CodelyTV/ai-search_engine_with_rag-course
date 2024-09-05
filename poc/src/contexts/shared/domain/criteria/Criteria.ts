@@ -18,7 +18,9 @@ export class Criteria {
 		public readonly pageNumber: number | null,
 	) {
 		if (pageNumber !== null && pageSize === null) {
-			throw new Error("Page size is required when page number is defined");
+			throw new Error(
+				"Page size is required when page number is defined",
+			);
 		}
 	}
 

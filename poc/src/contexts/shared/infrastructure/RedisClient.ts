@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
 	createClient,
 	RedisClientType,
@@ -9,7 +10,11 @@ import {
 
 export class RedisClient {
 	private readonly client: Promise<
-		RedisClientType<RedisDefaultModules & RedisModules, RedisFunctions, RedisScripts>
+		RedisClientType<
+			RedisDefaultModules & RedisModules,
+			RedisFunctions,
+			RedisScripts
+		>
 	>;
 
 	constructor() {
@@ -21,7 +26,10 @@ export class RedisClient {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	public async get<T>(key: string, deserializer: (parsedJson: any) => T): Promise<T | null> {
+	public async get<T>(
+		key: string,
+		deserializer: (parsedJson: any) => T,
+	): Promise<T | null> {
 		const value = await (await this.client).get(key);
 
 		if (value !== null) {
@@ -40,10 +48,16 @@ export class RedisClient {
 		return null;
 	}
 
-	public async set<T>(key: string, value: T, ttlInSeconds: number): Promise<void> {
+	public async set<T>(
+		key: string,
+		value: T,
+		ttlInSeconds: number,
+	): Promise<void> {
 		const serializedValue = JSON.stringify(value);
 
-		await (await this.client).set(key, serializedValue, { EX: ttlInSeconds });
+		await (
+			await this.client
+		).set(key, serializedValue, { EX: ttlInSeconds });
 	}
 
 	async flushAll(): Promise<void> {

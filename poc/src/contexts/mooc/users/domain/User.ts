@@ -1,4 +1,5 @@
 import { AggregateRoot } from "../../../shared/domain/AggregateRoot";
+
 import { UserEmail } from "./UserEmail";
 import { UserId } from "./UserId";
 import { UserName } from "./UserName";
@@ -27,7 +28,12 @@ export class User extends AggregateRoot {
 		super();
 	}
 
-	static create(id: string, name: string, email: string, profilePicture: string): User {
+	static create(
+		id: string,
+		name: string,
+		email: string,
+		profilePicture: string,
+	): User {
 		const defaultUserStatus = UserStatus.Active;
 		const defaultSuggestedCourses: string = "";
 
@@ -40,7 +46,15 @@ export class User extends AggregateRoot {
 			defaultSuggestedCourses,
 		);
 
-		user.record(new UserRegisteredDomainEvent(id, name, email, profilePicture, defaultUserStatus));
+		user.record(
+			new UserRegisteredDomainEvent(
+				id,
+				name,
+				email,
+				profilePicture,
+				defaultUserStatus,
+			),
+		);
 
 		return user;
 	}

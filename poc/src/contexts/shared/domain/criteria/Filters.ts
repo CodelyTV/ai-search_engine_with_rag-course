@@ -5,7 +5,13 @@ export class Filters {
 
 	static fromPrimitives(filters: FiltersPrimitives[]): Filters {
 		return new Filters(
-			filters.map((filter) => Filter.fromPrimitives(filter.field, filter.operator, filter.value)),
+			filters.map((filter) =>
+				Filter.fromPrimitives(
+					filter.field,
+					filter.operator,
+					filter.value,
+				),
+			),
 		);
 	}
 

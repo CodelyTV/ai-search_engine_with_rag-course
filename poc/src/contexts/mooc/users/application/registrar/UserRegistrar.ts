@@ -8,7 +8,12 @@ export class UserRegistrar {
 		private readonly eventBus: EventBus,
 	) {}
 
-	async registrar(id: string, name: string, email: string, profilePicture: string): Promise<void> {
+	async registrar(
+		id: string,
+		name: string,
+		email: string,
+		profilePicture: string,
+	): Promise<void> {
 		const user = User.create(id, name, email, profilePicture);
 
 		await this.repository.save(user);

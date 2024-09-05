@@ -33,7 +33,9 @@ export class CriteriaToSqlConverter {
 		}
 
 		if (criteria.pageSize !== null && criteria.pageNumber !== null) {
-			query = query.concat(` OFFSET ${criteria.pageSize * (criteria.pageNumber - 1)}`);
+			query = query.concat(
+				` OFFSET ${criteria.pageSize * (criteria.pageNumber - 1)}`,
+			);
 		}
 
 		return `${query};`;

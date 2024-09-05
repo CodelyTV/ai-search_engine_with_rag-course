@@ -5,7 +5,11 @@ describe("CriteriaToSqlConverter should", () => {
 	const converter = new CriteriaToSqlConverter();
 
 	it("Generate simple select with an empty criteria", () => {
-		const actualQuery = converter.convert(["id", "name"], "users", CriteriaMother.empty());
+		const actualQuery = converter.convert(
+			["id", "name"],
+			"users",
+			CriteriaMother.empty(),
+		);
 
 		expect(actualQuery).toBe("SELECT id, name FROM users;");
 	});
@@ -17,7 +21,9 @@ describe("CriteriaToSqlConverter should", () => {
 			CriteriaMother.emptySorted("id", "DESC"),
 		);
 
-		expect(actualQuery).toBe("SELECT id, name FROM users ORDER BY id DESC;");
+		expect(actualQuery).toBe(
+			"SELECT id, name FROM users ORDER BY id DESC;",
+		);
 	});
 
 	it("Generate select with one filter", () => {
@@ -27,17 +33,27 @@ describe("CriteriaToSqlConverter should", () => {
 			CriteriaMother.withOneFilter("name", "EQUAL", "Javier"),
 		);
 
-		expect(actualQuery).toBe("SELECT id, name FROM users WHERE name = 'Javier';");
+		expect(actualQuery).toBe(
+			"SELECT id, name FROM users WHERE name = 'Javier';",
+		);
 	});
 
 	it("Generate select with one filter sorted", () => {
 		const actualQuery = converter.convert(
 			["id", "name"],
 			"users",
-			CriteriaMother.withOneFilterSorted("name", "EQUAL", "Javier", "id", "DESC"),
+			CriteriaMother.withOneFilterSorted(
+				"name",
+				"EQUAL",
+				"Javier",
+				"id",
+				"DESC",
+			),
 		);
 
-		expect(actualQuery).toBe("SELECT id, name FROM users WHERE name = 'Javier' ORDER BY id DESC;");
+		expect(actualQuery).toBe(
+			"SELECT id, name FROM users WHERE name = 'Javier' ORDER BY id DESC;",
+		);
 	});
 
 	it("Generate select with multiples filters", () => {
@@ -105,7 +121,9 @@ describe("CriteriaToSqlConverter should", () => {
 			CriteriaMother.withOneFilter("name", "CONTAINS", "Javier"),
 		);
 
-		expect(actualQuery).toBe("SELECT id, name FROM users WHERE name LIKE '%Javier%';");
+		expect(actualQuery).toBe(
+			"SELECT id, name FROM users WHERE name LIKE '%Javier%';",
+		);
 	});
 
 	it("Generate select with one not contains filter", () => {
@@ -115,7 +133,9 @@ describe("CriteriaToSqlConverter should", () => {
 			CriteriaMother.withOneFilter("name", "NOT_CONTAINS", "Javier"),
 		);
 
-		expect(actualQuery).toBe("SELECT id, name FROM users WHERE name NOT LIKE '%Javier%';");
+		expect(actualQuery).toBe(
+			"SELECT id, name FROM users WHERE name NOT LIKE '%Javier%';",
+		);
 	});
 
 	it("Generate simple select paginated", () => {
@@ -125,7 +145,9 @@ describe("CriteriaToSqlConverter should", () => {
 			CriteriaMother.emptyPaginated(10, 3),
 		);
 
-		expect(actualQuery).toBe("SELECT id, name FROM users LIMIT 10 OFFSET 20;");
+		expect(actualQuery).toBe(
+			"SELECT id, name FROM users LIMIT 10 OFFSET 20;",
+		);
 	});
 
 	it("Generate select with not contains filter", () => {
@@ -135,7 +157,9 @@ describe("CriteriaToSqlConverter should", () => {
 			CriteriaMother.withOneFilter("name", "NOT_CONTAINS", "Javier"),
 		);
 
-		expect(actualQuery).toBe("SELECT id, name FROM users WHERE name NOT LIKE '%Javier%';");
+		expect(actualQuery).toBe(
+			"SELECT id, name FROM users WHERE name NOT LIKE '%Javier%';",
+		);
 	});
 
 	it("Generate select with not equals filter", () => {
@@ -145,7 +169,9 @@ describe("CriteriaToSqlConverter should", () => {
 			CriteriaMother.withOneFilter("name", "NOT_EQUAL", "Javier"),
 		);
 
-		expect(actualQuery).toBe("SELECT id, name FROM users WHERE name != 'Javier';");
+		expect(actualQuery).toBe(
+			"SELECT id, name FROM users WHERE name != 'Javier';",
+		);
 	});
 
 	it("Generate select with one filter with a different name in the query", () => {
@@ -156,6 +182,8 @@ describe("CriteriaToSqlConverter should", () => {
 			{ fullname: "name" },
 		);
 
-		expect(actualQuery).toBe("SELECT id, name FROM users WHERE name = 'Javier';");
+		expect(actualQuery).toBe(
+			"SELECT id, name FROM users WHERE name = 'Javier';",
+		);
 	});
 });

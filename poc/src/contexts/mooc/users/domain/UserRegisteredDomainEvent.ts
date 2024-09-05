@@ -1,4 +1,5 @@
 import { DomainEventAttributes } from "../../../shared/domain/event/DomainEvent";
+
 import { UserDomainEvent } from "./UserDomainEvent";
 
 export class UserRegisteredDomainEvent extends UserDomainEvent {

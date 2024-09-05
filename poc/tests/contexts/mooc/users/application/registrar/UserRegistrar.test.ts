@@ -13,7 +13,9 @@ describe("UserRegistrar should", () => {
 		const expectedUser = UserMother.create();
 		const expectedUserPrimitives = expectedUser.toPrimitives();
 
-		const expectedDomainEvent = UserRegisteredDomainEventMother.create(expectedUserPrimitives);
+		const expectedDomainEvent = UserRegisteredDomainEventMother.create(
+			expectedUserPrimitives,
+		);
 
 		repository.shouldSave(expectedUser);
 		eventBus.shouldPublish([expectedDomainEvent]);

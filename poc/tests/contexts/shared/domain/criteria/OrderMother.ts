@@ -11,7 +11,9 @@ type OrderPrimitives = {
 export class OrderMother {
 	static create(params?: Partial<OrderPrimitives>): Order {
 		const randomOrderType =
-			Object.values(OrderTypes)[Math.floor(Math.random() * Object.values(OrderTypes).length)];
+			Object.values(OrderTypes)[
+				Math.floor(Math.random() * Object.values(OrderTypes).length)
+			];
 
 		const primitives: OrderPrimitives = {
 			orderBy: faker.string.alpha(10),

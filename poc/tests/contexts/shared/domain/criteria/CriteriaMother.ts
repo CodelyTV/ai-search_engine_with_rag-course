@@ -2,6 +2,7 @@ import { faker } from "@faker-js/faker";
 
 import { Criteria } from "../../../../../src/contexts/shared/domain/criteria/Criteria";
 import { FiltersPrimitives } from "../../../../../src/contexts/shared/domain/criteria/Filter";
+
 import { FiltersMother } from "./FiltersMother";
 import { OrderMother } from "./OrderMother";
 
@@ -46,7 +47,11 @@ export class CriteriaMother {
 		return Criteria.fromPrimitives([], null, null, pageSize, pageNumber);
 	}
 
-	static withOneFilter(field: string, operator: string, value: string): Criteria {
+	static withOneFilter(
+		field: string,
+		operator: string,
+		value: string,
+	): Criteria {
 		return Criteria.fromPrimitives(
 			[
 				{

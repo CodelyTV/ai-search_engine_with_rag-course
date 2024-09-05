@@ -1,4 +1,7 @@
-import { DomainEvent, DomainEventAttributes } from "../../../shared/domain/event/DomainEvent";
+import {
+	DomainEvent,
+	DomainEventAttributes,
+} from "../../../shared/domain/event/DomainEvent";
 
 export class UserDomainEvent extends DomainEvent {
 	static eventName = "codely.mooc.user.*";
@@ -18,7 +21,12 @@ export class UserDomainEvent extends DomainEvent {
 		occurredOn: Date,
 		_attributes: DomainEventAttributes,
 	): UserDomainEvent {
-		return new UserDomainEvent(UserDomainEvent.eventName, aggregateId, eventId, occurredOn);
+		return new UserDomainEvent(
+			UserDomainEvent.eventName,
+			aggregateId,
+			eventId,
+			occurredOn,
+		);
 	}
 
 	toPrimitives(): { [key: string]: unknown } {

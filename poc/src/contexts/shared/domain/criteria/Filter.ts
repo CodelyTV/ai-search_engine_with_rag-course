@@ -13,13 +13,21 @@ export class Filter {
 	readonly operator: FilterOperator;
 	readonly value: FilterValue;
 
-	constructor(field: FilterField, operator: FilterOperator, value: FilterValue) {
+	constructor(
+		field: FilterField,
+		operator: FilterOperator,
+		value: FilterValue,
+	) {
 		this.field = field;
 		this.operator = operator;
 		this.value = value;
 	}
 
-	static fromPrimitives(field: string, operator: string, value: string): Filter {
+	static fromPrimitives(
+		field: string,
+		operator: string,
+		value: string,
+	): Filter {
 		return new Filter(
 			new FilterField(field),
 			new FilterOperator(Operator[operator as keyof typeof Operator]),
