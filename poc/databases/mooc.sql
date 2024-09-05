@@ -14,3 +14,10 @@ CREATE TABLE mooc.user_course_suggestions (
 	completed_courses JSONB,
 	suggested_courses JSONB
 );
+
+CREATE TABLE mooc.courses (
+	id UUID PRIMARY KEY NOT NULL,
+	name VARCHAR(255) NOT NULL,
+	category VARCHAR(255) NOT NULL,
+	description TEXT
+);

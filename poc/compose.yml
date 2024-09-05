@@ -1,5 +1,5 @@
 services:
-  06_2_ia_good_practices_mariadb:
+  poc_postgres_pgvector:
     image: pgvector/pgvector:0.7.4-pg16
     restart: always
 
