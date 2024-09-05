@@ -1,9 +1,12 @@
+import { Service } from "diod";
+
 import { User } from "./User";
 import { UserDoesNotExist } from "./UserDoesNotExist";
 import { UserId } from "./UserId";
 import { UserRepository } from "./UserRepository";
 
-export class UserFinder {
+@Service()
+export class DomainUserFinder {
 	constructor(private readonly repository: UserRepository) {}
 
 	async find(id: string): Promise<User> {

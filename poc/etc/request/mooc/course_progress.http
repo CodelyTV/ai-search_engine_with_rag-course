@@ -1,10 +1,10 @@
 ### Complete a course and get the user
-POST http://localhost:3000/api/mooc/course_progress
+POST http://localhost:3000/api/mooc/course-progress
 Content-Type: application/json
 
 {
 	"courseId": "{{$random.uuid}}",
-	"userId": "5353ef23-e982-4acc-928e-c7cdad92152a",
+	"userId": "e21f5fdf-b366-4287-bb58-556ac51be99f",
 	"courseName": "Modelado del dominio: Repositorios"
 }
 

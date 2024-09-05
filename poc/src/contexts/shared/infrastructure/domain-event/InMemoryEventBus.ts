@@ -1,19 +1,27 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type,no-console */
+import { Service } from "diod";
+
 import { DomainEvent } from "../../domain/event/DomainEvent";
 import { DomainEventSubscriber } from "../../domain/event/DomainEventSubscriber";
 import { EventBus } from "../../domain/event/EventBus";
+import { container } from "../dependency-injection/diod.config";
 
+@Service()
 export class InMemoryEventBus implements EventBus {
 	private readonly subscriptions: Map<
 		string,
 		{ subscriber: Function; name: string }[]
 	> = new Map();
 
-	constructor(subscribers: DomainEventSubscriber<DomainEvent>[]) {
-		this.registerSubscribers(subscribers);
-	}
-
 	async publish(events: DomainEvent[]): Promise<void> {
+		const subscribers = container
+			.findTaggedServiceIdentifiers<
+				DomainEventSubscriber<DomainEvent>
+			>("subscriber")
+			.map((id) => container.get(id));
+
+		this.registerSubscribers(subscribers);
+
 		const executions: unknown[] = [];
 
 		events.forEach((event) => {

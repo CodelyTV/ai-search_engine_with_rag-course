@@ -1,14 +1,16 @@
 /* eslint-disable no-console */
-import { Ollama } from "@langchain/community/llms/ollama";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
+import { ChatOllama } from "@langchain/ollama";
+import { Service } from "diod";
 import { z } from "zod";
 
 import { CourseSuggestion } from "../domain/CourseSuggestion";
 import { CourseSuggestionsGenerator } from "../domain/CourseSuggestionsGenerator";
 import { UserCourseSuggestions } from "../domain/UserCourseSuggestions";
 
+@Service()
 export class OllamaMistralCourseSuggestionsGenerator
 	implements CourseSuggestionsGenerator
 {
@@ -59,8 +61,8 @@ export class OllamaMistralCourseSuggestionsGenerator
                  * Los cursos completados por el usuario son:
                  {completed_courses}`,
 			),
-			new Ollama({
-				model: "mistral",
+			new ChatOllama({
+				model: "phi3",
 				temperature: 0,
 			}),
 			outputParser,
@@ -72,6 +74,8 @@ export class OllamaMistralCourseSuggestionsGenerator
 				.join("\n"),
 			format_instructions: outputParser.getFormatInstructions(),
 		});
+
+		console.log(suggestions);
 
 		return suggestions.map(
 			(suggestion) =>

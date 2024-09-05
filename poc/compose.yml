@@ -1,25 +1,17 @@
 services:
   06_2_ia_good_practices_mariadb:
-    image: mariadb:11
+    image: pgvector/pgvector:0.7.4-pg16
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: adminpassword
-      MYSQL_DATABASE: mooc
-      MYSQL_USER: codely
-      MYSQL_PASSWORD: c0d3ly7v
-      TZ: UTC
-    ports:
-      - "3306:3306"
-    volumes:
-      - db_data:/var/lib/mysql
-      - ./databases/codely.sql:/docker-entrypoint-initdb.d/init.sql
 
-  06_2_ia_good_practices_ollama:
-    image: ollama/ollama
-    volumes:
-      - ~/.ollama:/root/.ollama
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: codely
+      POSTGRES_PASSWORD: c0d3ly7v
     ports:
-      - "11434:11434"
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./databases:/docker-entrypoint-initdb.d
 
 volumes:
   db_data:

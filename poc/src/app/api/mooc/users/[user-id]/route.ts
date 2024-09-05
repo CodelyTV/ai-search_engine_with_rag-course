@@ -1,19 +1,24 @@
+import "reflect-metadata";
+
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 import { NextResponse } from "next/server";
 
 import { UserFinder } from "../../../../../contexts/mooc/users/application/find/UserFinder";
-import { MySqlUserRepository } from "../../../../../contexts/mooc/users/infrastructure/MySqlUserRepository";
-import { MariaDBConnection } from "../../../../../contexts/shared/infrastructure/MariaDBConnection";
+import { container } from "../../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 
-const finder = new UserFinder(new MySqlUserRepository(new MariaDBConnection()));
+const finder = container.get(UserFinder);
 
 export async function GET(
 	_request: Request,
 	context: { params: Params },
 ): Promise<NextResponse> {
-	const userId = context.params.user_id as string;
+	const userId = context.params["user-id"] as string;
 
-	const users = await finder.find(userId);
+	try {
+		const users = await finder.find(userId);
 
-	return NextResponse.json(users.toPrimitives());
+		return NextResponse.json(users.toPrimitives());
+	} catch (error) {
+		return NextResponse.json({ error }, { status: 500 });
+	}
 }

@@ -1,9 +1,12 @@
+import { Service } from "diod";
+
 import { DomainEventClass } from "../../../../shared/domain/event/DomainEventClass";
 import { DomainEventSubscriber } from "../../../../shared/domain/event/DomainEventSubscriber";
 import { UserCourseSuggestionsGenerated } from "../../../user-course-suggestions/domain/UserCourseSuggestionsGenerated";
 
 import { UserCourseSuggestionsUpdater } from "./UserCourseSuggestionsUpdater";
 
+@Service()
 export class UpdateUserCourseSuggestionsOnUserCourseSuggestionsGenerated
 	implements DomainEventSubscriber<UserCourseSuggestionsGenerated>
 {

@@ -1,9 +1,12 @@
+import { Service } from "diod";
+
 import { DomainEventClass } from "../../../../shared/domain/event/DomainEventClass";
 import { DomainEventSubscriber } from "../../../../shared/domain/event/DomainEventSubscriber";
 import { UserCourseProgressCompletedDomainEvent } from "../../../user-course-progress/domain/UserCourseProgressCompletedDomainEvent";
 
 import { UserCourseSuggestionsGenerator } from "./UserCourseSuggestionsGenerator";
 
+@Service()
 export class GenerateUserCourseSuggestionsOnUserCourseProgressCompleted
 	implements DomainEventSubscriber<UserCourseProgressCompletedDomainEvent>
 {

@@ -1,14 +1,16 @@
 import { MySqlUserRepository } from "../../../../../src/contexts/mooc/users/infrastructure/MySqlUserRepository";
-import { MariaDBConnection } from "../../../../../src/contexts/shared/infrastructure/MariaDBConnection";
+import { container } from "../../../../../src/contexts/shared/infrastructure/dependency-injection/diod.config";
+import { PostgresConnection } from "../../../../../src/contexts/shared/infrastructure/postgres/PostgresConnection";
 import { UserIdMother } from "../domain/UserIdMother";
 import { UserMother } from "../domain/UserMother";
 
 describe("MySqlUserRepository should", () => {
-	const connection = new MariaDBConnection();
+	const connection = container.get(PostgresConnection);
 	const repository = new MySqlUserRepository(connection);
 
-	beforeEach(async () => await connection.truncate("mooc__users"));
-	afterAll(async () => await connection.close());
+	beforeEach(async () => {
+		await new PostgresConnection().truncateAll();
+	});
 
 	it("save a user", async () => {
 		const user = UserMother.create();
