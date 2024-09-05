@@ -14,6 +14,8 @@ export abstract class PostgresRepository<T extends AggregateRoot> {
 		this.sql = connection.sql;
 	}
 
+	protected abstract toAggregate(row: Row): T;
+
 	async searchOne(
 		strings: TemplateStringsArray,
 		...values: any[]
@@ -40,6 +42,4 @@ export abstract class PostgresRepository<T extends AggregateRoot> {
 	): Promise<void> {
 		await this.sql(strings, ...values);
 	}
-
-	protected abstract toAggregate(row: Row): T;
 }

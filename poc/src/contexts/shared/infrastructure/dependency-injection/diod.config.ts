@@ -22,20 +22,22 @@ const builder = new ContainerBuilder();
 // Shared
 builder
 	.register(PostgresConnection)
-	.useInstance(
-		new PostgresConnection(
+	.useFactory(() => {
+		return new PostgresConnection(
 			"localhost",
 			5432,
 			"codely",
 			"c0d3ly7v",
 			"postgres",
-		),
-	);
+		);
+	})
+	.asSingleton();
 
 builder.register(EventBus).use(InMemoryEventBus);
 
 // User
 builder.register(UserRepository).use(PostgresUserRepository);
+builder.registerAndUse(PostgresUserRepository);
 
 builder.registerAndUse(UserFinder);
 builder.registerAndUse(DomainUserFinder);

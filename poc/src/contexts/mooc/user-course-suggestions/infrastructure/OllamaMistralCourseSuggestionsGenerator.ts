@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
@@ -74,8 +73,6 @@ export class OllamaMistralCourseSuggestionsGenerator
 				.join("\n"),
 			format_instructions: outputParser.getFormatInstructions(),
 		});
-
-		console.log(suggestions);
 
 		return suggestions.map(
 			(suggestion) =>

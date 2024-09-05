@@ -1,15 +1,21 @@
-import { MySqlUserRepository } from "../../../../../src/contexts/mooc/users/infrastructure/MySqlUserRepository";
+import "reflect-metadata";
+
+import { PostgresUserRepository } from "../../../../../src/contexts/mooc/users/infrastructure/PostgresUserRepository";
 import { container } from "../../../../../src/contexts/shared/infrastructure/dependency-injection/diod.config";
 import { PostgresConnection } from "../../../../../src/contexts/shared/infrastructure/postgres/PostgresConnection";
 import { UserIdMother } from "../domain/UserIdMother";
 import { UserMother } from "../domain/UserMother";
 
-describe("MySqlUserRepository should", () => {
-	const connection = container.get(PostgresConnection);
-	const repository = new MySqlUserRepository(connection);
+const connection = container.get(PostgresConnection);
+const repository = container.get(PostgresUserRepository);
 
+describe("PostgresUserRepository should", () => {
 	beforeEach(async () => {
-		await new PostgresConnection().truncateAll();
+		await connection.truncateAll();
+	});
+
+	afterAll(async () => {
+		await connection.end();
 	});
 
 	it("save a user", async () => {
