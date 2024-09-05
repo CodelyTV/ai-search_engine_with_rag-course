@@ -61,7 +61,7 @@ export class OllamaMistralCourseSuggestionsGenerator
                  {completed_courses}`,
 			),
 			new ChatOllama({
-				model: "phi3",
+				model: "mistral",
 				temperature: 0,
 			}),
 			outputParser,

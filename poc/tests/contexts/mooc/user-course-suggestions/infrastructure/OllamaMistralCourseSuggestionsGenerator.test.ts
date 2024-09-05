@@ -7,11 +7,11 @@ import { UserCourseSuggestionsMother } from "../domain/UserCourseSuggestionsMoth
 describe("OllamaMistralCourseSuggestionsGenerator should", () => {
 	const generator = new OllamaMistralCourseSuggestionsGenerator();
 
-	let suggestions: CourseSuggestion[];
 	const someExistingCourses = faker.helpers.arrayElements(
 		generator.existingCodelyCourses,
 		4,
 	);
+	let suggestions: CourseSuggestion[];
 
 	beforeAll(async () => {
 		suggestions = await generator.generate(
