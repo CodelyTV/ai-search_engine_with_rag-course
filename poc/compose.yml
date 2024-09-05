@@ -1,0 +1,25 @@
+services:
+  06_2_ia_good_practices_mariadb:
+    image: mariadb:11
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: adminpassword
+      MYSQL_DATABASE: mooc
+      MYSQL_USER: codely
+      MYSQL_PASSWORD: c0d3ly7v
+      TZ: UTC
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./databases/codely.sql:/docker-entrypoint-initdb.d/init.sql
+
+  06_2_ia_good_practices_ollama:
+    image: ollama/ollama
+    volumes:
+      - ~/.ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+
+volumes:
+  db_data:
