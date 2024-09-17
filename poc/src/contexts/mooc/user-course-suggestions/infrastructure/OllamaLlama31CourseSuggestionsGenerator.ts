@@ -38,38 +38,44 @@ export class OllamaLlama31CourseSuggestionsGenerator
 					suggestedCourse: z.string().describe("Curso sugerido."),
 					reason: z
 						.string()
-						.describe("Motivo por qué el curso es sugerido."),
+						.describe("Motivo por el que el curso es sugerido."),
 				}),
 			),
 		);
 
-		const chain = RunnableSequence.from([
-			PromptTemplate.fromTemplate(
-				`
-* Actúas como un recomendador de cursos avanzado.
-* Solo debes sugerir cursos de la siguiente lista (IMPORTANTE: no incluyas cursos que no estén en la lista):
-${similarCourses.map((course) => `\t- ${course.name}`).join("\n")}
-* Devuelve una lista con los 3 cursos recomendados.
-* No puedes añadir cursos que el usuario ya ha completado.
-* Añade también el motivo de la sugerencia (IMPORTANTE: Ha de ser en castellano)
-* Ejemplo de respuesta de la razón de la sugerencia: "Porque haciendo el curso de DDD en PHP has demostrado interés en PHP".
-* Devuelve sólo la lista de cursos con sus razones, sin añadir información adicional.
-* Siempre respondes utilizando el siguiente JSON Schema (importante que las claves de "suggestedCourse" y "reason" van entre comillas dobles):
+		const promptTemplate = PromptTemplate.fromTemplate(
+			`
+Eres un avanzado recomendador de cursos. Tu tarea es sugerir al usuario los 3 mejores cursos de la siguiente lista (importante: solo puedes elegir cursos de esta lista):
+
+{available_courses}
+
+Ten en cuenta lo siguiente:
+- No sugieras cursos que el usuario ya ha completado.
+- Proporciona una razón en castellano para cada curso sugerido. Ejemplo: "Porque has demostrado interés en PHP al completar el curso de DDD en PHP".
+- Responde únicamente con el siguiente formato JSON:
+
 {format_instructions}
-* Los cursos completados por el usuario son:
+
+Cursos que el usuario ya ha completado:
 {completed_courses}
-                 `.trim(),
-			),
+    `.trim(),
+		);
+
+		const chain = RunnableSequence.from([
+			promptTemplate,
 			new ChatOllama({
 				model: "llama3.1:8b",
-				temperature: 0,
+				temperature: 0.7,
 			}),
 			outputParser,
 		]);
 
 		const suggestions = await chain.invoke({
+			available_courses: similarCourses
+				.map((course) => `- ${course.name}`)
+				.join("\n"),
 			completed_courses: completedCourses
-				.map((course) => `* ${course.name}`)
+				.map((course) => `- ${course.name}`)
 				.join("\n"),
 			format_instructions: outputParser.getFormatInstructions(),
 		});
