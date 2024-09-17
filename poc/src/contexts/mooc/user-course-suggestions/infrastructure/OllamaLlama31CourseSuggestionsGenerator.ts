@@ -1,10 +1,15 @@
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
-import { PromptTemplate } from "@langchain/core/prompts";
+import {
+	ChatPromptTemplate,
+	HumanMessagePromptTemplate,
+	SystemMessagePromptTemplate,
+} from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { ChatOllama } from "@langchain/ollama";
 import { Service } from "diod";
 import { z } from "zod";
 
+import { Course } from "../../courses/domain/Course";
 import { CourseId } from "../../courses/domain/CourseId";
 import { CourseRepository } from "../../courses/domain/CourseRepository";
 import { CourseSuggestion } from "../domain/CourseSuggestion";
@@ -35,48 +40,59 @@ export class OllamaLlama31CourseSuggestionsGenerator
 		const outputParser = StructuredOutputParser.fromZodSchema(
 			z.array(
 				z.object({
-					suggestedCourse: z.string().describe("Curso sugerido."),
+					suggestedCourse: z
+						.string()
+						.describe("Nombre del curso sugerido."),
 					reason: z
 						.string()
-						.describe("Motivo por el que el curso es sugerido."),
+						.describe("Motivo por el que se sugiere el curso."),
 				}),
 			),
 		);
 
-		const promptTemplate = PromptTemplate.fromTemplate(
-			`
-Eres un avanzado recomendador de cursos. Tu tarea es sugerir al usuario los 3 mejores cursos de la siguiente lista (importante: solo puedes elegir cursos de esta lista):
+		const chatPrompt = ChatPromptTemplate.fromMessages([
+			SystemMessagePromptTemplate.fromTemplate(
+				`
+Eres un avanzado recomendador de cursos. Tu tarea es sugerir al usuario los 3 mejores cursos de una lista proporcionada. Ten en cuenta lo siguiente:
+- Solo puedes elegir cursos de la lista disponible.
+- No sugieras cursos que el usuario ya ha completado.
+- Tus sugerencias son en castellano neutro e inclusivo.
+- Proporciona una razón en castellano para cada curso sugerido. Ejemplo: "Porque has demostrado interés en PHP al completar el curso de DDD en PHP".
+- Intenta añadir en las razones cursos similares que el usuario ya ha completado.
+- Responde únicamente con el siguiente formato JSON (no añadas \`\`\`json ni nada similar a la respuesta):
+
+{format_instructions}
+        `.trim(),
+			),
+			HumanMessagePromptTemplate.fromTemplate(
+				`
+Lista de cursos disponibles (cada curso se presenta con su nombre, resumen y categorías):
 
 {available_courses}
 
-Ten en cuenta lo siguiente:
-- No sugieras cursos que el usuario ya ha completado.
-- Proporciona una razón en castellano para cada curso sugerido. Ejemplo: "Porque has demostrado interés en PHP al completar el curso de DDD en PHP".
-- Responde únicamente con el siguiente formato JSON:
-
-{format_instructions}
-
 Cursos que el usuario ya ha completado:
+
 {completed_courses}
-    `.trim(),
-		);
+        `.trim(),
+			),
+		]);
 
 		const chain = RunnableSequence.from([
-			promptTemplate,
+			chatPrompt,
 			new ChatOllama({
 				model: "llama3.1:8b",
-				temperature: 0.7,
+				temperature: 0,
 			}),
 			outputParser,
 		]);
 
 		const suggestions = await chain.invoke({
 			available_courses: similarCourses
-				.map((course) => `- ${course.name}`)
-				.join("\n"),
+				.map(this.formatCourse)
+				.join("\n\n"),
 			completed_courses: completedCourses
-				.map((course) => `- ${course.name}`)
-				.join("\n"),
+				.map(this.formatCourse)
+				.join("\n\n"),
 			format_instructions: outputParser.getFormatInstructions(),
 		});
 
@@ -87,5 +103,13 @@ Cursos que el usuario ya ha completado:
 					suggestion.reason,
 				),
 		);
+	}
+
+	formatCourse(course: Course): string {
+		return `
+- Nombre: ${course.name}
+  Resumen: ${course.summary}
+  Categorías: ${course.categories.join(", ")}
+      `.trim();
 	}
 }

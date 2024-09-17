@@ -82,9 +82,6 @@ export class PostgresCourseRepository
 			LIMIT 10;
 		`;
 
-		console.log("For embeddings", embeddings);
-		console.log("similar courses", similars);
-
 		return similars;
 	}
 

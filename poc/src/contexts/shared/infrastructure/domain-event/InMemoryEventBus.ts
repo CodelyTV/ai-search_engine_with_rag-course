@@ -25,13 +25,12 @@ export class InMemoryEventBus implements EventBus {
 		const executions: unknown[] = [];
 
 		events.forEach((event) => {
-			console.log(`\n📤 ${event.eventName}`);
+			console.log(`\n📤 Sending event \`${event.eventName}\` to:`);
 			const subscribers = this.subscriptions.get(event.eventName);
 
 			if (subscribers) {
 				subscribers.forEach((subscriber) => {
 					console.log(`  → 💻 ${subscriber.name}`);
-
 					executions.push(subscriber.subscriber(event));
 				});
 			}
@@ -56,16 +55,20 @@ export class InMemoryEventBus implements EventBus {
 		eventName: string,
 		subscriber: DomainEventSubscriber<DomainEvent>,
 	): void {
-		const currentSubscriptions = this.subscriptions.get(eventName);
+		const currentSubscriptions = this.subscriptions.get(eventName) ?? [];
+
 		const subscription = {
 			subscriber: subscriber.on.bind(subscriber),
 			name: subscriber.name(),
 		};
 
-		if (currentSubscriptions) {
+		const isDuplicate = currentSubscriptions.some(
+			(sub) => sub.name === subscription.name,
+		);
+
+		if (!isDuplicate) {
 			currentSubscriptions.push(subscription);
-		} else {
-			this.subscriptions.set(eventName, [subscription]);
+			this.subscriptions.set(eventName, currentSubscriptions);
 		}
 	}
 }
