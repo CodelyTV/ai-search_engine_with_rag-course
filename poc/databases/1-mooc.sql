@@ -18,6 +18,7 @@ CREATE TABLE mooc.user_course_suggestions (
 CREATE TABLE mooc.courses (
 	id uuid PRIMARY KEY NOT NULL,
 	name VARCHAR(255) NOT NULL,
-	description TEXT,
-	categories jsonb NOT NULL
+	summary TEXT,
+	categories jsonb NOT NULL,
+	embedding vector(8192)
 );

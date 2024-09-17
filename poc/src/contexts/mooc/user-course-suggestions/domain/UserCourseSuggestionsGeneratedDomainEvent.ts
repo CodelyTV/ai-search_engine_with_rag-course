@@ -8,7 +8,7 @@ export type UserCourseSuggestionsGeneratedDomainEventPrimitives = {
 	suggestions: string;
 };
 
-export class UserCourseSuggestionsGenerated extends DomainEvent {
+export class UserCourseSuggestionsGeneratedDomainEvent extends DomainEvent {
 	static eventName = "codely.mooc.user_course_suggestions.generated";
 
 	constructor(
@@ -18,7 +18,7 @@ export class UserCourseSuggestionsGenerated extends DomainEvent {
 		occurredOn?: Date,
 	) {
 		super(
-			UserCourseSuggestionsGenerated.eventName,
+			UserCourseSuggestionsGeneratedDomainEvent.eventName,
 			userId,
 			eventId,
 			occurredOn,
@@ -30,8 +30,8 @@ export class UserCourseSuggestionsGenerated extends DomainEvent {
 		eventId: string,
 		occurredOn: Date,
 		attributes: DomainEventAttributes,
-	): UserCourseSuggestionsGenerated {
-		return new UserCourseSuggestionsGenerated(
+	): UserCourseSuggestionsGeneratedDomainEvent {
+		return new UserCourseSuggestionsGeneratedDomainEvent(
 			aggregateId,
 			attributes.suggestions as string,
 			eventId,

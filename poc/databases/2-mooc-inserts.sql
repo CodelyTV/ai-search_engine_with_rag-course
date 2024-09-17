@@ -1,4 +1,4 @@
-INSERT INTO mooc.courses (id, name, categories, description)
+INSERT INTO mooc.courses (id, name, categories, summary)
 VALUES (gen_random_uuid(),
 		'Modelado del Dominio: Excepciones vs Errores',
 		'[

@@ -2,22 +2,22 @@ import { Service } from "diod";
 
 import { DomainEventClass } from "../../../../shared/domain/event/DomainEventClass";
 import { DomainEventSubscriber } from "../../../../shared/domain/event/DomainEventSubscriber";
-import { UserCourseSuggestionsGenerated } from "../../../user-course-suggestions/domain/UserCourseSuggestionsGenerated";
+import { UserCourseSuggestionsGeneratedDomainEvent } from "../../../user-course-suggestions/domain/UserCourseSuggestionsGeneratedDomainEvent";
 
 import { UserCourseSuggestionsUpdater } from "./UserCourseSuggestionsUpdater";
 
 @Service()
 export class UpdateUserCourseSuggestionsOnUserCourseSuggestionsGenerated
-	implements DomainEventSubscriber<UserCourseSuggestionsGenerated>
+	implements DomainEventSubscriber<UserCourseSuggestionsGeneratedDomainEvent>
 {
 	constructor(private readonly updater: UserCourseSuggestionsUpdater) {}
 
-	async on(event: UserCourseSuggestionsGenerated): Promise<void> {
+	async on(event: UserCourseSuggestionsGeneratedDomainEvent): Promise<void> {
 		await this.updater.update(event.userId, event.suggestions);
 	}
 
 	subscribedTo(): DomainEventClass[] {
-		return [UserCourseSuggestionsGenerated];
+		return [UserCourseSuggestionsGeneratedDomainEvent];
 	}
 
 	name(): string {

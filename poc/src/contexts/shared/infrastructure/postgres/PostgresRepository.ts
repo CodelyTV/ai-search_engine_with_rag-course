@@ -16,7 +16,7 @@ export abstract class PostgresRepository<T extends AggregateRoot> {
 
 	protected abstract toAggregate(row: Row): T;
 
-	async searchOne(
+	protected async searchOne(
 		strings: TemplateStringsArray,
 		...values: any[]
 	): Promise<T | null> {
@@ -26,7 +26,7 @@ export abstract class PostgresRepository<T extends AggregateRoot> {
 		return result.length ? this.toAggregate(result[0]) : null;
 	}
 
-	async searchMany(
+	protected async searchMany(
 		strings: TemplateStringsArray,
 		...values: any[]
 	): Promise<T[]> {
@@ -36,7 +36,7 @@ export abstract class PostgresRepository<T extends AggregateRoot> {
 		return result.map((row) => this.toAggregate(row));
 	}
 
-	async execute(
+	protected async execute(
 		strings: TemplateStringsArray,
 		...values: any[]
 	): Promise<void> {

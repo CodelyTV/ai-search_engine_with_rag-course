@@ -38,7 +38,7 @@ export class PostgresUserRepository
 				profile_picture = EXCLUDED.profile_picture,
 				status = EXCLUDED.status,
 				suggested_courses = EXCLUDED.suggested_courses;
-`;
+		`;
 	}
 
 	async search(id: UserId): Promise<User | null> {

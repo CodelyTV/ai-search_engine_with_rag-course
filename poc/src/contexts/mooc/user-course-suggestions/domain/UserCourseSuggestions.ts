@@ -4,7 +4,7 @@ import {
 	CourseSuggestion,
 	CourseSuggestionPrimitives,
 } from "./CourseSuggestion";
-import { UserCourseSuggestionsGenerated } from "./UserCourseSuggestionsGenerated";
+import { UserCourseSuggestionsGeneratedDomainEvent } from "./UserCourseSuggestionsGeneratedDomainEvent";
 
 export type UserCourseSuggestionsPrimitives = {
 	userId: string;
@@ -45,7 +45,7 @@ export class UserCourseSuggestions extends AggregateRoot {
 		this.suggestions = suggestions;
 
 		this.record(
-			new UserCourseSuggestionsGenerated(
+			new UserCourseSuggestionsGeneratedDomainEvent(
 				this.userId,
 				JSON.stringify(
 					suggestions.map((suggestion) => suggestion.toPrimitives()),
