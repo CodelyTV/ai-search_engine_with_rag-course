@@ -67,7 +67,7 @@ export class OpenAIChatGPT35CourseSuggestionsGenerator
 		]);
 
 		const suggestions = await chain.invoke({
-			completed_courses: userCourseSuggestions.completedCourses
+			completed_courses: userCourseSuggestions.completedCourseIds
 				.map((course) => `* ${course}`)
 				.join("\n"),
 			format_instructions: outputParser.getFormatInstructions(),

@@ -7,17 +7,9 @@ import { UserCourseProgressCompletedDomainEvent } from "../../domain/UserCourseP
 export class UserCourseProgressCompleter {
 	constructor(private readonly eventBus: EventBus) {}
 
-	async complete(
-		courseId: string,
-		userId: string,
-		courseName: string,
-	): Promise<void> {
+	async complete(courseId: string, userId: string): Promise<void> {
 		await this.eventBus.publish([
-			new UserCourseProgressCompletedDomainEvent(
-				courseId,
-				userId,
-				courseName,
-			),
+			new UserCourseProgressCompletedDomainEvent(courseId, userId),
 		]);
 	}
 }

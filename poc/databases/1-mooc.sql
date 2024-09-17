@@ -11,7 +11,7 @@ CREATE TABLE mooc.users (
 
 CREATE TABLE mooc.user_course_suggestions (
 	user_id uuid PRIMARY KEY NOT NULL,
-	completed_courses jsonb,
+	completed_course_ids jsonb,
 	suggested_courses jsonb
 );
 

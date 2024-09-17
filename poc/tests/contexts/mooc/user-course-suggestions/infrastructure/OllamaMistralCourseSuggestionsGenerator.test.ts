@@ -1,11 +1,11 @@
 import { faker } from "@faker-js/faker";
 
 import { CourseSuggestion } from "../../../../../src/contexts/mooc/user-course-suggestions/domain/CourseSuggestion";
-import { OllamaMistralCourseSuggestionsGenerator } from "../../../../../src/contexts/mooc/user-course-suggestions/infrastructure/OllamaMistralCourseSuggestionsGenerator";
+import { OllamaLlama31CourseSuggestionsGenerator } from "../../../../../src/contexts/mooc/user-course-suggestions/infrastructure/OllamaLlama31CourseSuggestionsGenerator";
 import { UserCourseSuggestionsMother } from "../domain/UserCourseSuggestionsMother";
 
 describe("OllamaMistralCourseSuggestionsGenerator should", () => {
-	const generator = new OllamaMistralCourseSuggestionsGenerator();
+	const generator = new OllamaLlama31CourseSuggestionsGenerator();
 
 	const someExistingCourses = faker.helpers.arrayElements(
 		generator.existingCodelyCourses,

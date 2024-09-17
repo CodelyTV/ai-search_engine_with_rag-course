@@ -7,9 +7,10 @@ import { GenerateUserCourseSuggestionsOnUserCourseProgressCompleted } from "../.
 import { UserCourseSuggestionsGenerator } from "../../../mooc/user-course-suggestions/application/generate/UserCourseSuggestionsGenerator";
 import { CourseSuggestionsGenerator } from "../../../mooc/user-course-suggestions/domain/CourseSuggestionsGenerator";
 import { UserCourseSuggestionsRepository } from "../../../mooc/user-course-suggestions/domain/UserCourseSuggestionsRepository";
-import { OllamaMistralCourseSuggestionsGenerator } from "../../../mooc/user-course-suggestions/infrastructure/OllamaMistralCourseSuggestionsGenerator";
+import { OllamaLlama31CourseSuggestionsGenerator } from "../../../mooc/user-course-suggestions/infrastructure/OllamaLlama31CourseSuggestionsGenerator";
 import { PostgresUserCourseSuggestionsRepository } from "../../../mooc/user-course-suggestions/infrastructure/PostgresUserCourseSuggestionsRepository";
 import { UserFinder } from "../../../mooc/users/application/find/UserFinder";
+import { UserRegistrar } from "../../../mooc/users/application/registrar/UserRegistrar";
 import { UpdateUserCourseSuggestionsOnUserCourseSuggestionsGenerated } from "../../../mooc/users/application/update-course-suggestions/UpdateUserCourseSuggestionsOnUserCourseSuggestionsGenerated";
 import { UserCourseSuggestionsUpdater } from "../../../mooc/users/application/update-course-suggestions/UserCourseSuggestionsUpdater";
 import { DomainUserFinder } from "../../../mooc/users/domain/DomainUserFinder";
@@ -41,6 +42,8 @@ builder.register(EventBus).use(InMemoryEventBus);
 builder.register(UserRepository).use(PostgresUserRepository);
 builder.registerAndUse(PostgresUserRepository);
 
+builder.registerAndUse(UserRegistrar);
+
 builder.registerAndUse(UserFinder);
 builder.registerAndUse(DomainUserFinder);
 
@@ -52,7 +55,7 @@ builder.registerAndUse(UserCourseSuggestionsUpdater);
 // UserCourseSuggestions
 builder
 	.register(CourseSuggestionsGenerator)
-	.use(OllamaMistralCourseSuggestionsGenerator);
+	.use(OllamaLlama31CourseSuggestionsGenerator);
 builder
 	.register(UserCourseSuggestionsRepository)
 	.use(PostgresUserCourseSuggestionsRepository);

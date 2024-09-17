@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Primitives } from "@codelytv/primitives-type";
 import { OllamaEmbeddings } from "@langchain/ollama";
 import { Service } from "diod";
@@ -60,23 +61,40 @@ export class PostgresCourseRepository
 		`;
 	}
 
-	async searchSimilar(courses: Course[]): Promise<Course[]> {
-		if (courses.length === 0) {
+	async searchSimilar(ids: CourseId[]): Promise<Course[]> {
+		const coursesToSearchSimilars = await this.searchByIds(ids);
+
+		if (coursesToSearchSimilars.length === 0) {
 			return [];
 		}
 
 		const embeddings = await this.generateCoursesEmbeddings(
-			courses.map((course) => course.toPrimitives()),
+			coursesToSearchSimilars.map((course) => course.toPrimitives()),
 		);
 
-		const courseIds = courses.map((course) => course.id.value);
+		const plainIds = ids.map((id) => id.value);
+
+		const similars = await this.searchMany`
+			SELECT id, name, summary, categories
+			FROM mooc.courses
+    		WHERE id != ALL(${plainIds}::text[])
+			ORDER BY embedding <-> ${embeddings}::vector(768)
+			LIMIT 10;
+		`;
+
+		console.log("For embeddings", embeddings);
+		console.log("similar courses", similars);
+
+		return similars;
+	}
+
+	async searchByIds(ids: CourseId[]): Promise<Course[]> {
+		const plainIds = ids.map((id) => id.value);
 
 		return await this.searchMany`
 			SELECT id, name, summary, categories
 			FROM mooc.courses
-    		WHERE id != ALL(${courseIds}::text[])
-			ORDER BY embedding <-> ${embeddings}::vector(768)
-			LIMIT 10;
+			WHERE id = ANY(${plainIds}::text[]);
 		`;
 	}
 

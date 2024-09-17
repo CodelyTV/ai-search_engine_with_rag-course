@@ -1,20 +1,18 @@
+import { Primitives } from "@codelytv/primitives-type";
 import { faker } from "@faker-js/faker";
 
-import {
-	UserCourseSuggestions,
-	UserCourseSuggestionsPrimitives,
-} from "../../../../../src/contexts/mooc/user-course-suggestions/domain/UserCourseSuggestions";
+import { UserCourseSuggestions } from "../../../../../src/contexts/mooc/user-course-suggestions/domain/UserCourseSuggestions";
 import { UserIdMother } from "../../users/domain/UserIdMother";
 
 import { CourseSuggestionMother } from "./CourseSuggestionMother";
 
 export class UserCourseSuggestionsMother {
 	static create(
-		params?: Partial<UserCourseSuggestionsPrimitives>,
+		params?: Partial<Primitives<UserCourseSuggestions>>,
 	): UserCourseSuggestions {
-		const primitives: UserCourseSuggestionsPrimitives = {
+		const primitives: Primitives<UserCourseSuggestions> = {
 			userId: UserIdMother.create().value,
-			completedCourses: faker.helpers.multiple(
+			completedCourseIds: faker.helpers.multiple(
 				() => faker.string.alpha(50),
 				{
 					count: {
@@ -36,6 +34,9 @@ export class UserCourseSuggestionsMother {
 	static withoutSuggestions(
 		completedCourses: string[],
 	): UserCourseSuggestions {
-		return this.create({ suggestions: [], completedCourses });
+		return this.create({
+			suggestions: [],
+			completedCourseIds: completedCourses,
+		});
 	}
 }

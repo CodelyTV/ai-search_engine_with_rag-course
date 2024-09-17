@@ -1,32 +1,25 @@
+import { Primitives } from "@codelytv/primitives-type";
+
 import { AggregateRoot } from "../../../shared/domain/AggregateRoot";
 
-import {
-	CourseSuggestion,
-	CourseSuggestionPrimitives,
-} from "./CourseSuggestion";
+import { CourseSuggestion } from "./CourseSuggestion";
 import { UserCourseSuggestionsGeneratedDomainEvent } from "./UserCourseSuggestionsGeneratedDomainEvent";
-
-export type UserCourseSuggestionsPrimitives = {
-	userId: string;
-	completedCourses: string[];
-	suggestions: CourseSuggestionPrimitives[];
-};
 
 export class UserCourseSuggestions extends AggregateRoot {
 	constructor(
 		public readonly userId: string,
-		public completedCourses: string[],
+		public completedCourseIds: string[],
 		public suggestions: CourseSuggestion[],
 	) {
 		super();
 	}
 
 	static fromPrimitives(
-		primitives: UserCourseSuggestionsPrimitives,
+		primitives: Primitives<UserCourseSuggestions>,
 	): UserCourseSuggestions {
 		return new UserCourseSuggestions(
 			primitives.userId,
-			primitives.completedCourses,
+			primitives.completedCourseIds,
 			primitives.suggestions.map((suggestions) =>
 				CourseSuggestion.fromPrimitives(suggestions),
 			),
@@ -37,8 +30,8 @@ export class UserCourseSuggestions extends AggregateRoot {
 		return new UserCourseSuggestions(userId, [], []);
 	}
 
-	addCompletedCourse(courseName: string): void {
-		this.completedCourses.push(courseName);
+	addCompletedCourse(courseId: string): void {
+		this.completedCourseIds.push(courseId);
 	}
 
 	updateSuggestions(suggestions: CourseSuggestion[]): void {
@@ -54,17 +47,17 @@ export class UserCourseSuggestions extends AggregateRoot {
 		);
 	}
 
-	toPrimitives(): UserCourseSuggestionsPrimitives {
+	toPrimitives(): Primitives<UserCourseSuggestions> {
 		return {
 			userId: this.userId,
-			completedCourses: this.completedCourses,
+			completedCourseIds: this.completedCourseIds,
 			suggestions: this.suggestions.map((suggestion) =>
 				suggestion.toPrimitives(),
 			),
 		};
 	}
 
-	hasCompleted(courseName: string): boolean {
-		return this.completedCourses.includes(courseName);
+	hasCompleted(courseId: string): boolean {
+		return this.completedCourseIds.includes(courseId);
 	}
 }

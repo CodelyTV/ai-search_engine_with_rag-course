@@ -10,20 +10,16 @@ async function main(): Promise<void> {
 	const repository = container.get(PostgresCourseRepository);
 	const connection = container.get(PostgresConnection);
 
-	// Vue 3: Novedades aplicadas al mundo real
-	// Buenas prácticas con CSS: Layouts
-	// Migrando a VueJS progresivamente
-	const courseIds = ["qoh2", "2eym", "j685"];
+	const ids = [
+		// Vue 3: Novedades aplicadas al mundo real
+		new CourseId("qoh2"),
+		// Buenas prácticas con CSS: Layouts
+		new CourseId("2eym"),
+		// Migrando a VueJS progresivamente
+		new CourseId("j685"),
+	];
 
-	const courses = (
-		await Promise.all(
-			courseIds.map(async (id) => {
-				return await repository.search(new CourseId(id));
-			}),
-		)
-	).filter((course) => course !== null);
-
-	const similarCourses = await repository.searchSimilar(courses);
+	const similarCourses = await repository.searchSimilar(ids);
 
 	console.log(similarCourses);
 	await connection.end();

@@ -11,13 +11,12 @@ const completer = container.get(UserCourseProgressCompleter);
 const userFinder = container.get(UserFinder);
 
 export async function POST(request: Request): Promise<NextResponse> {
-	const { courseId, userId, courseName } = (await request.json()) as {
+	const { courseId, userId } = (await request.json()) as {
 		courseId: string;
 		userId: string;
-		courseName: string;
 	};
 
-	await completer.complete(courseId, userId, courseName);
+	await completer.complete(courseId, userId);
 
 	const user = await userFinder.find(userId);
 

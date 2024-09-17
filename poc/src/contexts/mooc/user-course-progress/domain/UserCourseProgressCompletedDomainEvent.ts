@@ -6,7 +6,6 @@ import {
 export type CourseProgressCompletedDomainEventPrimitives = {
 	id: string;
 	userId: string;
-	courseName: string;
 };
 
 export class UserCourseProgressCompletedDomainEvent extends DomainEvent {
@@ -15,7 +14,6 @@ export class UserCourseProgressCompletedDomainEvent extends DomainEvent {
 	constructor(
 		public readonly id: string,
 		public readonly userId: string,
-		public readonly courseName: string,
 		eventId?: string,
 		occurredOn?: Date,
 	) {
@@ -36,7 +34,6 @@ export class UserCourseProgressCompletedDomainEvent extends DomainEvent {
 		return new UserCourseProgressCompletedDomainEvent(
 			aggregateId,
 			attributes.userId as string,
-			attributes.courseName as string,
 			eventId,
 			occurredOn,
 		);
@@ -46,7 +43,6 @@ export class UserCourseProgressCompletedDomainEvent extends DomainEvent {
 		return {
 			id: this.id,
 			userId: this.userId,
-			courseName: this.courseName,
 		};
 	}
 }

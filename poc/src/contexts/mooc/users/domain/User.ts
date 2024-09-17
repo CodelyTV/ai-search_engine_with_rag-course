@@ -35,7 +35,7 @@ export class User extends AggregateRoot {
 		profilePicture: string,
 	): User {
 		const defaultUserStatus = UserStatus.Active;
-		const defaultSuggestedCourses: string = "";
+		const defaultSuggestedCourses = "";
 
 		const user = new User(
 			new UserId(id),

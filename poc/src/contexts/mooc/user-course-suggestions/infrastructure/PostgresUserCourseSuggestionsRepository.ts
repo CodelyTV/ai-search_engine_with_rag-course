@@ -24,7 +24,7 @@ export class PostgresUserCourseSuggestionsRepository
 			INSERT INTO mooc.user_course_suggestions (user_id, completed_courses, suggested_courses)
 			VALUES (
 				${primitives.userId},
-				${primitives.completedCourses},
+				${primitives.completedCourseIds},
 				${primitives.suggestions}
 			)
 			ON CONFLICT (user_id) DO UPDATE SET
@@ -46,7 +46,7 @@ export class PostgresUserCourseSuggestionsRepository
 	): UserCourseSuggestions {
 		return UserCourseSuggestions.fromPrimitives({
 			userId: row.user_id,
-			completedCourses: row.completed_courses,
+			completedCourseIds: row.completed_courses,
 			suggestions: row.suggested_courses.map((primitives) =>
 				CourseSuggestion.fromPrimitives(primitives),
 			),

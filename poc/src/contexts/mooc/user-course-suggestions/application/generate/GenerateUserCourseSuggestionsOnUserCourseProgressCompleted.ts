@@ -13,7 +13,7 @@ export class GenerateUserCourseSuggestionsOnUserCourseProgressCompleted
 	constructor(private readonly generator: UserCourseSuggestionsGenerator) {}
 
 	async on(event: UserCourseProgressCompletedDomainEvent): Promise<void> {
-		await this.generator.generate(event.userId, event.courseName);
+		await this.generator.generate(event.userId, event.id);
 	}
 
 	subscribedTo(): DomainEventClass[] {
