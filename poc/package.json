@@ -10,7 +10,8 @@
 		"lint:fix": "eslint . --fix",
 		"test": "jest --testPathIgnorePatterns=.*\\.ci\\.test\\.ts$",
 		"test:ci": "jest --testMatch '**/*.ci.test.ts'",
-		"create-courses": "ts-node ./src/app/scripts/create-courses.ts"
+		"create-courses": "ts-node ./src/app/scripts/create-courses.ts",
+		"search-similar-courses": "ts-node ./src/app/scripts/search-similar-courses.ts"
 	},
 	"dependencies": {
 		"@langchain/core": "^0.3.1",

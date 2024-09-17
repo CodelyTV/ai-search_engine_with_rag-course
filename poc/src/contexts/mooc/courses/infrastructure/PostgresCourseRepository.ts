@@ -33,7 +33,7 @@ export class PostgresCourseRepository
 
 	async save(course: Course): Promise<void> {
 		const userPrimitives = course.toPrimitives();
-		const embedding = await this.generateEmbedding(userPrimitives);
+		const embedding = await this.generateCourseEmbedding(userPrimitives);
 
 		await this.execute`
 			INSERT INTO mooc.courses (id, name, summary, categories, embedding)
@@ -60,6 +60,23 @@ export class PostgresCourseRepository
 		`;
 	}
 
+	async searchSimilar(courses: Course[]): Promise<Course[]> {
+		if (courses.length === 0) {
+			return [];
+		}
+
+		const embeddings = await this.generateCoursesEmbeddings(
+			courses.map((course) => course.toPrimitives()),
+		);
+
+		return await this.searchMany`
+			SELECT id, name, summary, categories
+			FROM mooc.courses
+			ORDER BY embedding <-> ${embeddings}::vector(768)
+			LIMIT 10;
+		`;
+	}
+
 	protected toAggregate(row: DatabaseCourseRow): Course {
 		return Course.fromPrimitives({
 			id: row.id,
@@ -69,18 +86,34 @@ export class PostgresCourseRepository
 		});
 	}
 
-	private async generateEmbedding(
+	private async generateCourseEmbedding(
 		course: Primitives<Course>,
 	): Promise<string> {
 		const vectorEmbedding = await this.embeddingsGenerator.embedQuery(
-			[
-				`Id: ${course.id}`,
-				`Name: ${course.name}`,
-				`Summary: ${course.summary}`,
-				`Categories: ${course.categories.join(", ")}`,
-			].join("|"),
+			this.serializeCourseForEmbedding(course),
 		);
 
 		return `[${vectorEmbedding.join(",")}]`;
+	}
+
+	private async generateCoursesEmbeddings(
+		courses: Primitives<Course>[],
+	): Promise<string> {
+		const vectorEmbedding = await this.embeddingsGenerator.embedQuery(
+			courses
+				.map((course) => this.serializeCourseForEmbedding(course))
+				.join(),
+		);
+
+		return `[${vectorEmbedding.join(",")}]`;
+	}
+
+	private serializeCourseForEmbedding(course: Primitives<Course>): string {
+		return [
+			`Id: ${course.id}`,
+			`Name: ${course.name}`,
+			`Summary: ${course.summary}`,
+			`Categories: ${course.categories.join(", ")}`,
+		].join("|");
 	}
 }
