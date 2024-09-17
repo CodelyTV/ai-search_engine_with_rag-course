@@ -1,5 +1,8 @@
+import { Primitives } from "@codelytv/primitives-type";
+import { OllamaEmbeddings } from "@langchain/ollama";
 import { Service } from "diod";
 
+import { PostgresConnection } from "../../../shared/infrastructure/postgres/PostgresConnection";
 import { PostgresRepository } from "../../../shared/infrastructure/postgres/PostgresRepository";
 import { Course } from "../domain/Course";
 import { CourseId } from "../domain/CourseId";
@@ -10,7 +13,6 @@ type DatabaseCourseRow = {
 	name: string;
 	summary: string;
 	categories: string[];
-	embedding: string;
 };
 
 @Service()
@@ -18,9 +20,20 @@ export class PostgresCourseRepository
 	extends PostgresRepository<Course>
 	implements CourseRepository
 {
+	private readonly embeddingsGenerator: OllamaEmbeddings;
+
+	constructor(connection: PostgresConnection) {
+		super(connection);
+
+		this.embeddingsGenerator = new OllamaEmbeddings({
+			model: "nomic-embed-text",
+			baseUrl: "http://localhost:11434",
+		});
+	}
+
 	async save(course: Course): Promise<void> {
 		const userPrimitives = course.toPrimitives();
-		const embedding = "";
+		const embedding = await this.generateEmbedding(userPrimitives);
 
 		await this.execute`
 			INSERT INTO mooc.courses (id, name, summary, categories, embedding)
@@ -47,13 +60,6 @@ export class PostgresCourseRepository
 		`;
 	}
 
-	async searchAll(): Promise<Course[]> {
-		return await this.searchMany`
-			SELECT id, name, summary, categories
-			FROM mooc.courses;
-		`;
-	}
-
 	protected toAggregate(row: DatabaseCourseRow): Course {
 		return Course.fromPrimitives({
 			id: row.id,
@@ -61,5 +67,20 @@ export class PostgresCourseRepository
 			summary: row.summary,
 			categories: row.categories,
 		});
+	}
+
+	private async generateEmbedding(
+		course: Primitives<Course>,
+	): Promise<string> {
+		const vectorEmbedding = await this.embeddingsGenerator.embedQuery(
+			[
+				`Id: ${course.id}`,
+				`Name: ${course.name}`,
+				`Summary: ${course.summary}`,
+				`Categories: ${course.categories.join(", ")}`,
+			].join("|"),
+		);
+
+		return `[${vectorEmbedding.join(",")}]`;
 	}
 }
