@@ -10,6 +10,9 @@ async function main(): Promise<void> {
 	const repository = container.get(PostgresCourseRepository);
 	const connection = container.get(PostgresConnection);
 
+	// Vue 3: Novedades aplicadas al mundo real
+	// Buenas prácticas con CSS: Layouts
+	// Migrando a VueJS progresivamente
 	const courseIds = ["qoh2", "2eym", "j685"];
 
 	const courses = (

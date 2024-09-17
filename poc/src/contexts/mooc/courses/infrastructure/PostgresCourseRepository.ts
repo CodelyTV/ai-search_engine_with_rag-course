@@ -69,9 +69,12 @@ export class PostgresCourseRepository
 			courses.map((course) => course.toPrimitives()),
 		);
 
+		const courseIds = courses.map((course) => course.id.value);
+
 		return await this.searchMany`
 			SELECT id, name, summary, categories
 			FROM mooc.courses
+    		WHERE id != ALL(${courseIds}::text[])
 			ORDER BY embedding <-> ${embeddings}::vector(768)
 			LIMIT 10;
 		`;
