@@ -77,12 +77,15 @@ export class PostgresCourseRepository
 		);
 
 		const plainIds = ids.map((id) => id.value);
+		const recencyWeight = 0.001;
 
 		return await this.searchMany`
 			SELECT id, name, summary, categories, published_at
 			FROM mooc.courses
-    		WHERE id != ALL(${plainIds}::text[])
-			ORDER BY embedding <-> ${embeddings}::vector(768)
+			WHERE id != ALL(${plainIds}::text[])
+			ORDER BY
+				(embedding <-> ${embeddings}::vector(768)) +
+				${recencyWeight} * EXTRACT(EPOCH FROM NOW() - published_at) / 86400
 			LIMIT 10;
 		`;
 	}
@@ -134,7 +137,6 @@ export class PostgresCourseRepository
 			`Name: ${course.name}`,
 			`Summary: ${course.summary}`,
 			`Categories: ${course.categories.join(", ")}`,
-			`Published at: ${course.publishedAt.toISOString().split("T")[0]}`,
 		].join("|");
 	}
 }
