@@ -14,6 +14,7 @@ type DatabaseCourseRow = {
 	name: string;
 	summary: string;
 	categories: string[];
+	published_at: Date;
 };
 
 @Service()
@@ -38,25 +39,27 @@ export class PostgresCourseRepository
 			await this.generateCourseDocumentEmbedding(userPrimitives);
 
 		await this.execute`
-			INSERT INTO mooc.courses (id, name, summary, categories, embedding)
+			INSERT INTO mooc.courses (id, name, summary, categories, published_at, embedding)
 			VALUES (
 				${userPrimitives.id},
 				${userPrimitives.name},
 				${userPrimitives.summary},
 				${userPrimitives.categories},
+				${userPrimitives.publishedAt},
 				${embedding}
 			)
 			ON CONFLICT (id) DO UPDATE SET
 				name = EXCLUDED.name,
 				summary = EXCLUDED.summary,
 				categories = EXCLUDED.categories,
+				published_at = EXCLUDED.published_at,
 				embedding = EXCLUDED.embedding;
 		`;
 	}
 
 	async search(id: CourseId): Promise<Course | null> {
 		return await this.searchOne`
-			SELECT id, name, summary, categories
+			SELECT id, name, summary, categories, published_at
 			FROM mooc.courses
 			WHERE id = ${id.value};
 		`;
@@ -76,7 +79,7 @@ export class PostgresCourseRepository
 		const plainIds = ids.map((id) => id.value);
 
 		return await this.searchMany`
-			SELECT id, name, summary, categories
+			SELECT id, name, summary, categories, published_at
 			FROM mooc.courses
     		WHERE id != ALL(${plainIds}::text[])
 			ORDER BY embedding <-> ${embeddings}::vector(768)
@@ -88,7 +91,7 @@ export class PostgresCourseRepository
 		const plainIds = ids.map((id) => id.value);
 
 		return await this.searchMany`
-			SELECT id, name, summary, categories
+			SELECT id, name, summary, categories, published_at
 			FROM mooc.courses
 			WHERE id = ANY(${plainIds}::text[]);
 		`;
@@ -100,6 +103,7 @@ export class PostgresCourseRepository
 			name: row.name,
 			summary: row.summary,
 			categories: row.categories,
+			publishedAt: row.published_at,
 		});
 	}
 
@@ -127,10 +131,10 @@ export class PostgresCourseRepository
 
 	private serializeCourseForEmbedding(course: Primitives<Course>): string {
 		return [
-			`Id: ${course.id}`,
 			`Name: ${course.name}`,
 			`Summary: ${course.summary}`,
 			`Categories: ${course.categories.join(", ")}`,
+			`Published at: ${course.publishedAt.toISOString().split("T")[0]}`,
 		].join("|");
 	}
 }

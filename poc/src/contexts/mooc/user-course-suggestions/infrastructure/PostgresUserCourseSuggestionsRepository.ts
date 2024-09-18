@@ -9,7 +9,7 @@ import { UserCourseSuggestionsRepository } from "../domain/UserCourseSuggestions
 
 type DatabaseUserCourseSuggestionsRow = {
 	user_id: string;
-	completed_courses: string[];
+	completed_course_ids: string[];
 	suggested_courses: CourseSuggestionPrimitives[];
 };
 
@@ -21,21 +21,21 @@ export class PostgresUserCourseSuggestionsRepository
 		const primitives = user.toPrimitives();
 
 		await this.execute`
-			INSERT INTO mooc.user_course_suggestions (user_id, completed_courses, suggested_courses)
+			INSERT INTO mooc.user_course_suggestions (user_id, completed_course_ids, suggested_courses)
 			VALUES (
 				${primitives.userId},
 				${primitives.completedCourseIds},
 				${primitives.suggestions}
 			)
 			ON CONFLICT (user_id) DO UPDATE SET
-				completed_courses = EXCLUDED.completed_courses,
+				completed_course_ids = EXCLUDED.completed_course_ids,
 				suggested_courses = EXCLUDED.suggested_courses;
 		`;
 	}
 
 	async search(id: UserId): Promise<UserCourseSuggestions | null> {
 		return await this.searchOne`
-			SELECT user_id, completed_courses, suggested_courses
+			SELECT user_id, completed_course_ids, suggested_courses
 			FROM mooc.user_course_suggestions
 			WHERE user_id = ${id.value};
 		`;
@@ -46,7 +46,7 @@ export class PostgresUserCourseSuggestionsRepository
 	): UserCourseSuggestions {
 		return UserCourseSuggestions.fromPrimitives({
 			userId: row.user_id,
-			completedCourseIds: row.completed_courses,
+			completedCourseIds: row.completed_course_ids,
 			suggestions: row.suggested_courses.map((primitives) =>
 				CourseSuggestion.fromPrimitives(primitives),
 			),

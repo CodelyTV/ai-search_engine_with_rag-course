@@ -10,6 +10,7 @@ export class Course extends AggregateRoot {
 		readonly name: string,
 		readonly summary: string,
 		readonly categories: string[],
+		readonly publishedAt: Date,
 	) {
 		super();
 	}
@@ -20,6 +21,7 @@ export class Course extends AggregateRoot {
 			primitives.name,
 			primitives.summary,
 			primitives.categories,
+			primitives.publishedAt,
 		);
 	}
 
@@ -29,11 +31,14 @@ export class Course extends AggregateRoot {
 		summary: string,
 		categories: string[],
 	): Course {
+		const publishedAt = new Date();
+
 		return Course.fromPrimitives({
 			id,
 			name,
 			summary,
 			categories,
+			publishedAt,
 		});
 	}
 
@@ -43,6 +48,7 @@ export class Course extends AggregateRoot {
 			name: this.name,
 			summary: this.summary,
 			categories: this.categories,
+			publishedAt: this.publishedAt,
 		};
 	}
 }

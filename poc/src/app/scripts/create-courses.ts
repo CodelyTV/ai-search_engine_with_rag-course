@@ -14,7 +14,10 @@ async function main(): Promise<void> {
 
 	await Promise.all(
 		jsonCourses.map(async (jsonCourse) => {
-			const course = Course.fromPrimitives(jsonCourse);
+			const course = Course.fromPrimitives({
+				...jsonCourse,
+				publishedAt: new Date(jsonCourse.published_at),
+			});
 
 			await repository.save(course);
 		}),
