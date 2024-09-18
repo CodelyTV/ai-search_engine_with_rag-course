@@ -14,7 +14,7 @@ POST http://localhost:3000/api/mooc/course-progress
 Content-Type: application/json
 
 {
-	"courseId": "3j0r",
+	"courseId": "2eym",
 	"userId": "e21f5fdf-b366-4287-bb58-556ac51be99f"
 }
 

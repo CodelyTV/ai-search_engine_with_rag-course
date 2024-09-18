@@ -35,6 +35,7 @@ export class NextSuggestedCoursesEmailSender {
 
 		return NextSuggestedCoursesEmail.create(
 			user.email,
+			user.name,
 			courses.map((course) => {
 				const suggestion = suggestions.find(
 					(suggestion) => suggestion.courseId === course.id,
@@ -42,6 +43,7 @@ export class NextSuggestedCoursesEmailSender {
 
 				return {
 					courseName: course.name,
+					courseSummary: course.summary,
 					reason: suggestion?.reason ?? "",
 				};
 			}),
