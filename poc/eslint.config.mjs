@@ -5,6 +5,12 @@ import globals from "globals";
 export default [
 	...eslintConfigCodely.course,
 	{
+		files: ["**/**.ts"],
+		rules: {
+			"@typescript-eslint/explicit-function-return-type": "error",
+		},
+	},
+	{
 		...eslintConfigNext.configs.recommended,
 		plugins: {
 			"@next/next": eslintConfigNext,

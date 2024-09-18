@@ -30,7 +30,7 @@ export class InMemoryEventBus implements EventBus {
 
 			if (subscribers) {
 				subscribers.forEach((subscriber) => {
-					console.log(`  → 💻 ${subscriber.name}`);
+					console.log(`\t→ 💻 ${subscriber.name}`);
 					executions.push(subscriber.subscriber(event));
 				});
 			}

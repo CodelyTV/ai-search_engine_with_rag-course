@@ -1,3 +1,5 @@
+import { Primitives } from "@codelytv/primitives-type";
+
 import { AggregateRoot } from "../../../shared/domain/AggregateRoot";
 
 import { UserEmail } from "./UserEmail";
@@ -6,15 +8,6 @@ import { UserName } from "./UserName";
 import { UserProfilePicture } from "./UserProfilePicture";
 import { UserRegisteredDomainEvent } from "./UserRegisteredDomainEvent";
 import { UserStatus } from "./UserStatus";
-
-export type UserPrimitives = {
-	id: string;
-	name: string;
-	email: string;
-	profilePicture: string;
-	status: string;
-	suggestedCourses: string;
-};
 
 export class User extends AggregateRoot {
 	private constructor(
@@ -59,7 +52,7 @@ export class User extends AggregateRoot {
 		return user;
 	}
 
-	static fromPrimitives(primitives: UserPrimitives): User {
+	static fromPrimitives(primitives: Primitives<User>): User {
 		return new User(
 			new UserId(primitives.id),
 			new UserName(primitives.name),
@@ -70,7 +63,7 @@ export class User extends AggregateRoot {
 		);
 	}
 
-	toPrimitives(): UserPrimitives {
+	toPrimitives(): Primitives<User> {
 		return {
 			id: this.id.value,
 			name: this.name.value,

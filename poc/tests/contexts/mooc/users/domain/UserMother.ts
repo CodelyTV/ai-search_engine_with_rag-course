@@ -1,7 +1,6 @@
-import {
-	User,
-	UserPrimitives,
-} from "../../../../../src/contexts/mooc/users/domain/User";
+import { Primitives } from "@codelytv/primitives-type";
+
+import { User } from "../../../../../src/contexts/mooc/users/domain/User";
 import { UserStatus } from "../../../../../src/contexts/mooc/users/domain/UserStatus";
 
 import { UserEmailMother } from "./UserEmailMother";
@@ -10,8 +9,8 @@ import { UserNameMother } from "./UserNameMother";
 import { UserProfilePictureMother } from "./UserProfilePictureMother";
 
 export class UserMother {
-	static create(params?: Partial<UserPrimitives>): User {
-		const primitives: UserPrimitives = {
+	static create(params?: Partial<Primitives<User>>): User {
+		const primitives: Primitives<User> = {
 			id: UserIdMother.create().value,
 			name: UserNameMother.create().value,
 			email: UserEmailMother.create().value,

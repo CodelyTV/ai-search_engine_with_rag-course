@@ -23,9 +23,9 @@ export async function GET(
 
 			const userId = context.params["user-id"] as string;
 
-			const users = await finder.find(userId);
+			const user = await finder.find(userId);
 
-			return NextResponse.json(users.toPrimitives());
+			return NextResponse.json(user);
 		},
 		(error: UserFinderErrors) => {
 			return HttpNextResponse.domainError(error, 404);

@@ -1,3 +1,4 @@
+import { Primitives } from "@codelytv/primitives-type";
 import { Service } from "diod";
 
 import { User } from "../../domain/User";
@@ -11,13 +12,13 @@ export type UserFinderErrors = UserDoesNotExistError;
 export class UserFinder {
 	constructor(private readonly repository: UserRepository) {}
 
-	async find(id: string): Promise<User> {
+	async find(id: string): Promise<Primitives<User>> {
 		const user = await this.repository.search(new UserId(id));
 
 		if (user === null) {
 			throw new UserDoesNotExistError(id);
 		}
 
-		return user;
+		return user.toPrimitives();
 	}
 }
