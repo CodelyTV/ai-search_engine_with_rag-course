@@ -1,27 +1,24 @@
 export type CourseSuggestionPrimitives = {
-	courseName: string;
-	suggestionReason: string;
+	courseId: string;
+	reason: string;
 };
 
 export class CourseSuggestion {
 	constructor(
-		public readonly courseName: string,
-		public readonly suggestionReason: string,
+		public readonly courseId: string,
+		public readonly reason: string,
 	) {}
 
 	static fromPrimitives(
 		primitives: CourseSuggestionPrimitives,
 	): CourseSuggestion {
-		return new CourseSuggestion(
-			primitives.courseName,
-			primitives.suggestionReason,
-		);
+		return new CourseSuggestion(primitives.courseId, primitives.reason);
 	}
 
 	toPrimitives(): CourseSuggestionPrimitives {
 		return {
-			courseName: this.courseName,
-			suggestionReason: this.suggestionReason,
+			courseId: this.courseId,
+			reason: this.reason,
 		};
 	}
 }

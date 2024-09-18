@@ -40,9 +40,7 @@ export class UserCourseSuggestions extends AggregateRoot {
 		this.record(
 			new UserCourseSuggestionsGeneratedDomainEvent(
 				this.userId,
-				JSON.stringify(
-					suggestions.map((suggestion) => suggestion.toPrimitives()),
-				),
+				suggestions.map((suggestion) => suggestion.toPrimitives()),
 			),
 		);
 	}

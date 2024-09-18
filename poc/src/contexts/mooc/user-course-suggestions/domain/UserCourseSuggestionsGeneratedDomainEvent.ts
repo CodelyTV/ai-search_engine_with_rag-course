@@ -3,9 +3,14 @@ import {
 	DomainEventAttributes,
 } from "../../../shared/domain/event/DomainEvent";
 
+export type CourseSuggestions = {
+	courseId: string;
+	reason: string;
+}[];
+
 export type UserCourseSuggestionsGeneratedDomainEventPrimitives = {
 	userId: string;
-	suggestions: string;
+	suggestions: CourseSuggestions;
 };
 
 export class UserCourseSuggestionsGeneratedDomainEvent extends DomainEvent {
@@ -13,7 +18,7 @@ export class UserCourseSuggestionsGeneratedDomainEvent extends DomainEvent {
 
 	constructor(
 		public readonly userId: string,
-		public readonly suggestions: string,
+		public readonly suggestions: CourseSuggestions,
 		eventId?: string,
 		occurredOn?: Date,
 	) {
@@ -33,7 +38,7 @@ export class UserCourseSuggestionsGeneratedDomainEvent extends DomainEvent {
 	): UserCourseSuggestionsGeneratedDomainEvent {
 		return new UserCourseSuggestionsGeneratedDomainEvent(
 			aggregateId,
-			attributes.suggestions as string,
+			attributes.suggestions as CourseSuggestions,
 			eventId,
 			occurredOn,
 		);

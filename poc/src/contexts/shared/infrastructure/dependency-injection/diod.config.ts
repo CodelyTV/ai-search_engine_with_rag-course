@@ -1,5 +1,6 @@
 import { ContainerBuilder } from "diod";
 
+import { CoursesByIdsSearcher } from "../../../mooc/courses/application/search-by-ids/CoursesByIdsSearcher";
 import { CourseRepository } from "../../../mooc/courses/domain/CourseRepository";
 import { PostgresCourseRepository } from "../../../mooc/courses/infrastructure/PostgresCourseRepository";
 import { UserCourseProgressCompleter } from "../../../mooc/user-course-progress/application/complete/UserCourseProgressCompleter";
@@ -69,6 +70,7 @@ builder.registerAndUse(UserCourseProgressCompleter);
 // Course
 builder.register(CourseRepository).use(PostgresCourseRepository);
 builder.registerAndUse(PostgresCourseRepository);
+builder.registerAndUse(CoursesByIdsSearcher);
 
 // Export container
 export const container = builder.build();

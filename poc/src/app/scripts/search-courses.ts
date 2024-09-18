@@ -16,7 +16,7 @@ async function main(
 	const results = await connection.sql`
 		SELECT id, name, summary, categories, published_at
 		FROM mooc.courses
-		ORDER BY (embedding <-> ${embedding}::vector(768))
+		ORDER BY (embedding <-> ${embedding})
 		LIMIT 3;
 	`;
 
@@ -30,10 +30,7 @@ const embeddingsGenerator = new OllamaEmbeddings({
 	baseUrl: "http://localhost:11434",
 });
 
-// get args from cli
-const query = process.argv[2];
-
-main(query, pgConnection, embeddingsGenerator)
+main(process.argv[2], pgConnection, embeddingsGenerator)
 	.catch(console.error)
 	.finally(async () => {
 		await pgConnection.end();

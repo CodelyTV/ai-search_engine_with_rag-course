@@ -11,7 +11,7 @@ export class CourseSuggestionMother {
 	): CourseSuggestion {
 		const primitives: CourseSuggestionPrimitives = {
 			courseName: faker.string.alpha(50),
-			suggestionReason: faker.string.alpha(150),
+			reason: faker.string.alpha(150),
 			...params,
 		};
 

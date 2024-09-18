@@ -8,10 +8,7 @@ import { PostgresConnection } from "../../contexts/shared/infrastructure/postgre
 
 import jsonCourses from "./courses.json";
 
-async function main(): Promise<void> {
-	const repository = container.get(PostgresCourseRepository);
-	const connection = container.get(PostgresConnection);
-
+async function main(repository: PostgresCourseRepository): Promise<void> {
 	await Promise.all(
 		jsonCourses.map(async (jsonCourse) => {
 			const course = Course.fromPrimitives({
@@ -22,10 +19,13 @@ async function main(): Promise<void> {
 			await repository.save(course);
 		}),
 	);
-
-	await connection.end();
-
-	console.log("Done!");
 }
 
-main().catch(console.error);
+main(container.get(PostgresCourseRepository))
+	.catch(console.error)
+	.finally(async () => {
+		await container.get(PostgresConnection).end();
+		console.log("Done!");
+
+		process.exit(0);
+	});

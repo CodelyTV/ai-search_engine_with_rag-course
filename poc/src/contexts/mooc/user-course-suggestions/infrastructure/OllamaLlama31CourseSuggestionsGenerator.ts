@@ -40,7 +40,8 @@ export class OllamaLlama31CourseSuggestionsGenerator
 		const outputParser = StructuredOutputParser.fromZodSchema(
 			z.array(
 				z.object({
-					suggestedCourse: z
+					courseId: z.string().describe("Id del curso sugerido."),
+					courseName: z
 						.string()
 						.describe("Nombre del curso sugerido."),
 					reason: z
@@ -98,18 +99,16 @@ Cursos que el usuario ya ha completado:
 
 		return suggestions.map(
 			(suggestion) =>
-				new CourseSuggestion(
-					suggestion.suggestedCourse,
-					suggestion.reason,
-				),
+				new CourseSuggestion(suggestion.courseId, suggestion.reason),
 		);
 	}
 
 	formatCourse(course: Course): string {
 		return `
-- Nombre: ${course.name}
+- Id: ${course.id.value}
+  Nombre: ${course.name}
   Resumen: ${course.summary}
   Categorías: ${course.categories.join(", ")}
-      `.trim();
+		`.trim();
 	}
 }
