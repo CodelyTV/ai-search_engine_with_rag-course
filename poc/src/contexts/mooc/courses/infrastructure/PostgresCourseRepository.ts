@@ -34,7 +34,8 @@ export class PostgresCourseRepository
 
 	async save(course: Course): Promise<void> {
 		const userPrimitives = course.toPrimitives();
-		const embedding = await this.generateCourseEmbedding(userPrimitives);
+		const embedding =
+			await this.generateCourseDocumentEmbedding(userPrimitives);
 
 		await this.execute`
 			INSERT INTO mooc.courses (id, name, summary, categories, embedding)
@@ -62,27 +63,25 @@ export class PostgresCourseRepository
 	}
 
 	async searchSimilar(ids: CourseId[]): Promise<Course[]> {
-		const coursesToSearchSimilars = await this.searchByIds(ids);
+		const coursesToSearchSimilar = await this.searchByIds(ids);
 
-		if (coursesToSearchSimilars.length === 0) {
+		if (coursesToSearchSimilar.length === 0) {
 			return [];
 		}
 
-		const embeddings = await this.generateCoursesEmbeddings(
-			coursesToSearchSimilars.map((course) => course.toPrimitives()),
+		const embeddings = await this.generateCoursesQueryEmbeddings(
+			coursesToSearchSimilar.map((course) => course.toPrimitives()),
 		);
 
 		const plainIds = ids.map((id) => id.value);
 
-		const similars = await this.searchMany`
+		return await this.searchMany`
 			SELECT id, name, summary, categories
 			FROM mooc.courses
     		WHERE id != ALL(${plainIds}::text[])
 			ORDER BY embedding <-> ${embeddings}::vector(768)
 			LIMIT 10;
 		`;
-
-		return similars;
 	}
 
 	async searchByIds(ids: CourseId[]): Promise<Course[]> {
@@ -104,17 +103,17 @@ export class PostgresCourseRepository
 		});
 	}
 
-	private async generateCourseEmbedding(
+	private async generateCourseDocumentEmbedding(
 		course: Primitives<Course>,
 	): Promise<string> {
-		const vectorEmbedding = await this.embeddingsGenerator.embedQuery(
-			this.serializeCourseForEmbedding(course),
+		const [vectorEmbedding] = await this.embeddingsGenerator.embedDocuments(
+			[this.serializeCourseForEmbedding(course)],
 		);
 
 		return `[${vectorEmbedding.join(",")}]`;
 	}
 
-	private async generateCoursesEmbeddings(
+	private async generateCoursesQueryEmbeddings(
 		courses: Primitives<Course>[],
 	): Promise<string> {
 		const vectorEmbedding = await this.embeddingsGenerator.embedQuery(
