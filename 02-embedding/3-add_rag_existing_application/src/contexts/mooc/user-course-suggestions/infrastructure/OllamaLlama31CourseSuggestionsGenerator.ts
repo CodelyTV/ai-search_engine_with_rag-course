@@ -31,8 +31,9 @@ export class OllamaLlama31CourseSuggestionsGenerator
 			(id) => new CourseId(id),
 		);
 
-		const similarCourses =
-			await this.courseRepository.searchSimilar(completedCourseIds);
+		const availableCourses = await this.courseRepository.searchAll();
+		// const availableCourses = await
+		// this.courseRepository.searchSimilar(completedCourseIds);
 
 		const completedCourses =
 			await this.courseRepository.searchByIds(completedCourseIds);
@@ -88,7 +89,7 @@ Cursos que el usuario ya ha completado:
 		]);
 
 		const suggestions = await chain.invoke({
-			available_courses: similarCourses
+			available_courses: availableCourses
 				.map(this.formatCourse)
 				.join("\n\n"),
 			completed_courses: completedCourses
@@ -104,11 +105,6 @@ Cursos que el usuario ya ha completado:
 	}
 
 	formatCourse(course: Course): string {
-		return `
-- Id: ${course.id.value}
-  Nombre: ${course.name}
-  Resumen: ${course.summary}
-  Categorías: ${course.categories.join(", ")}
-		`.trim();
+		return `- ${course.name}`.trim();
 	}
 }

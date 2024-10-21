@@ -4,6 +4,7 @@ import { PostgresRepository } from "../../../shared/infrastructure/postgres/Post
 import { User } from "../domain/User";
 import { UserId } from "../domain/UserId";
 import { UserRepository } from "../domain/UserRepository";
+import { UserStatus } from "../domain/UserStatus";
 
 type DatabaseUserRow = {
 	id: string;
@@ -55,7 +56,7 @@ export class PostgresUserRepository
 			name: row.name,
 			email: row.email,
 			profilePicture: row.profile_picture,
-			status: row.status,
+			status: row.status as UserStatus,
 			suggestedCourses: row.suggested_courses,
 		});
 	}

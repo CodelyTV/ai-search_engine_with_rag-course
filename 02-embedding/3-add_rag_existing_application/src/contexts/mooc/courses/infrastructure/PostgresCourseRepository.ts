@@ -65,6 +65,13 @@ export class PostgresCourseRepository
 		`;
 	}
 
+	async searchAll(): Promise<Course[]> {
+		return await this.searchMany`
+			SELECT id, name, summary, categories, published_at
+			FROM mooc.courses;
+		`;
+	}
+
 	async searchSimilar(ids: CourseId[]): Promise<Course[]> {
 		const coursesToSearchSimilar = await this.searchByIds(ids);
 
@@ -77,15 +84,13 @@ export class PostgresCourseRepository
 		);
 
 		const plainIds = ids.map((id) => id.value);
-		const recencyWeight = 0.001;
 
 		return await this.searchMany`
 			SELECT id, name, summary, categories, published_at
 			FROM mooc.courses
 			WHERE id != ALL(${plainIds}::text[])
 			ORDER BY
-				(embedding <-> ${embeddings}::vector(768)) +
-				${recencyWeight} * EXTRACT(EPOCH FROM NOW() - published_at) / 86400
+				(embedding <-> ${embeddings}::vector(768))
 			LIMIT 10;
 		`;
 	}
@@ -133,10 +138,6 @@ export class PostgresCourseRepository
 	}
 
 	private serializeCourseForEmbedding(course: Primitives<Course>): string {
-		return [
-			`Name: ${course.name}`,
-			`Summary: ${course.summary}`,
-			`Categories: ${course.categories.join(", ")}`,
-		].join("|");
+		return [`Name: ${course.name}`].join("|");
 	}
 }
