@@ -14,12 +14,22 @@ async function main(
 	await Promise.all(
 		jsonCourses.map(async (jsonCourse) => {
 			const [embedding] = await embeddingsGenerator.embedDocuments([
-				jsonCourse.name,
+				[
+					`Name: ${jsonCourse.name}`,
+					`Summary: ${jsonCourse.summary}`,
+					`Categories: ${jsonCourse.categories.join(", ")}`,
+				].join("|"),
 			]);
 
 			await pgConnection.sql`
-				INSERT INTO mooc.courses (id, name, embedding)
-				VALUES (${jsonCourse.id}, ${jsonCourse.name}, ${JSON.stringify(embedding)});
+				INSERT INTO mooc.courses (id, name, summary, categories, embedding)
+				VALUES (
+					${jsonCourse.id},
+					${jsonCourse.name},
+					${jsonCourse.summary},
+					${jsonCourse.categories},
+					${JSON.stringify(embedding)}
+				);
 			`;
 		}),
 	);

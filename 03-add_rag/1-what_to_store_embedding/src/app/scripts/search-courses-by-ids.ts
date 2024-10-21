@@ -5,12 +5,35 @@ import { OllamaEmbeddings } from "@langchain/ollama";
 
 import { PostgresConnection } from "../PostgresConnection";
 
+async function searchByIds(
+	pgConnection: PostgresConnection,
+	ids: string[],
+): Promise<{ name: string; summary: string; categories: string[] }[]> {
+	return pgConnection.sql`
+		SELECT id, name, summary, categories
+		FROM mooc.courses
+		WHERE id = ANY(${ids}::text[]);
+	`;
+}
+
 async function main(
-	query: string,
+	courseIds: string[],
 	pgConnection: PostgresConnection,
 	embeddingsGenerator: OllamaEmbeddings,
 ): Promise<void> {
-	const embedding = await embeddingsGenerator.embedQuery(query);
+	const courses = await searchByIds(pgConnection, courseIds);
+
+	const embedding = await embeddingsGenerator.embedQuery(
+		courses
+			.map((course) =>
+				[
+					`Name: ${course.name}`,
+					`Summary: ${course.summary}`,
+					`Categories: ${course.categories.join(", ")}`,
+				].join("|"),
+			)
+			.join("\n"),
+	);
 
 	const results = await pgConnection.sql`
 		SELECT name, summary, categories
@@ -19,7 +42,7 @@ async function main(
 		LIMIT 3;
 	`;
 
-	console.log(`For the query "${query}" the results are:`, results);
+	console.log(`For the query "${courseIds}" the results are:`, results);
 }
 
 const pgConnection = new PostgresConnection(
@@ -34,7 +57,7 @@ const embeddingsGenerator = new OllamaEmbeddings({
 	baseUrl: "http://localhost:11434",
 });
 
-main(process.argv[2], pgConnection, embeddingsGenerator)
+main(process.argv[2].split(","), pgConnection, embeddingsGenerator)
 	.catch(console.error)
 	.finally(async () => {
 		await pgConnection.end();
