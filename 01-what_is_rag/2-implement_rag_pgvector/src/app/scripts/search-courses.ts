@@ -3,8 +3,7 @@ import "reflect-metadata";
 
 import { OllamaEmbeddings } from "@langchain/ollama";
 
-import { container } from "../../contexts/shared/infrastructure/dependency-injection/diod.config";
-import { PostgresConnection } from "../../contexts/shared/infrastructure/postgres/PostgresConnection";
+import { PostgresConnection } from "../PostgresConnection";
 
 async function main(
 	query: string,
@@ -14,7 +13,7 @@ async function main(
 	const embedding = `[${(await embeddingsGenerator.embedQuery(query)).join(",")}]`;
 
 	const results = await connection.sql`
-		SELECT id, name, summary, categories, published_at
+		SELECT name
 		FROM mooc.courses
 		ORDER BY (embedding <-> ${embedding})
 		LIMIT 3;
@@ -23,8 +22,13 @@ async function main(
 	console.log(`For the query "${query}" the results are:`, results);
 }
 
-const pgConnection = container.get(PostgresConnection);
-
+const pgConnection = new PostgresConnection(
+	"localhost",
+	5432,
+	"codely",
+	"c0d3ly7v",
+	"postgres",
+);
 const embeddingsGenerator = new OllamaEmbeddings({
 	model: "nomic-embed-text",
 	baseUrl: "http://localhost:11434",

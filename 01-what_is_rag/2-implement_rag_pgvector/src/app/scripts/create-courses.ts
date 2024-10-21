@@ -1,30 +1,50 @@
 /* eslint-disable no-console */
 import "reflect-metadata";
 
-import { Course } from "../../contexts/mooc/courses/domain/Course";
-import { PostgresCourseRepository } from "../../contexts/mooc/courses/infrastructure/PostgresCourseRepository";
-import { container } from "../../contexts/shared/infrastructure/dependency-injection/diod.config";
-import { PostgresConnection } from "../../contexts/shared/infrastructure/postgres/PostgresConnection";
+import { OllamaEmbeddings } from "@langchain/ollama";
+
+import { PostgresConnection } from "../PostgresConnection";
 
 import jsonCourses from "./courses.json";
 
-async function main(repository: PostgresCourseRepository): Promise<void> {
+async function main(
+	pgConnection: PostgresConnection,
+	embeddingsGenerator: OllamaEmbeddings,
+): Promise<void> {
 	await Promise.all(
 		jsonCourses.map(async (jsonCourse) => {
-			const course = Course.fromPrimitives({
-				...jsonCourse,
-				publishedAt: new Date(jsonCourse.published_at),
-			});
+			const [embedding] = await embeddingsGenerator.embedDocuments([
+				jsonCourse.name,
+			]);
 
-			await repository.save(course);
+			await pgConnection.sql`
+				INSERT INTO mooc.courses (id, name, embedding)
+				VALUES (${jsonCourse.id}, ${jsonCourse.name}, ${JSON.stringify(embedding)});
+			`;
 		}),
 	);
 }
 
-main(container.get(PostgresCourseRepository))
-	.catch(console.error)
+const pgConnection = new PostgresConnection(
+	"localhost",
+	5432,
+	"codely",
+	"c0d3ly7v",
+	"postgres",
+);
+
+const embeddingsGenerator = new OllamaEmbeddings({
+	model: "nomic-embed-text",
+	baseUrl: "http://localhost:11434",
+});
+
+main(pgConnection, embeddingsGenerator)
+	.catch((error) => {
+		console.error(error);
+		process.exit(1);
+	})
 	.finally(async () => {
-		await container.get(PostgresConnection).end();
+		await pgConnection.end();
 		console.log("Done!");
 
 		process.exit(0);
