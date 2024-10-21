@@ -77,15 +77,12 @@ export class PostgresCourseRepository
 		);
 
 		const plainIds = ids.map((id) => id.value);
-		const recencyWeight = 0.001;
 
 		return await this.searchMany`
 			SELECT id, name, summary, categories, published_at
 			FROM mooc.courses
 			WHERE id != ALL(${plainIds}::text[])
-			ORDER BY
-				(embedding <-> ${embeddings}::vector(768)) +
-				${recencyWeight} * EXTRACT(EPOCH FROM NOW() - published_at) / 86400
+			ORDER BY (embedding <-> ${embeddings}) 
 			LIMIT 10;
 		`;
 	}
@@ -117,7 +114,7 @@ export class PostgresCourseRepository
 			[this.serializeCourseForEmbedding(course)],
 		);
 
-		return `[${vectorEmbedding.join(",")}]`;
+		return JSON.stringify(vectorEmbedding);
 	}
 
 	private async generateCoursesQueryEmbeddings(
@@ -129,7 +126,7 @@ export class PostgresCourseRepository
 				.join(),
 		);
 
-		return `[${vectorEmbedding.join(",")}]`;
+		return JSON.stringify(vectorEmbedding);
 	}
 
 	private serializeCourseForEmbedding(course: Primitives<Course>): string {

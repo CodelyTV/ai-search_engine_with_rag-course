@@ -3,10 +3,6 @@ import { ContainerBuilder } from "diod";
 import { CoursesByIdsSearcher } from "../../../mooc/courses/application/search-by-ids/CoursesByIdsSearcher";
 import { CourseRepository } from "../../../mooc/courses/domain/CourseRepository";
 import { PostgresCourseRepository } from "../../../mooc/courses/infrastructure/PostgresCourseRepository";
-import { NextSuggestedCoursesEmailSender } from "../../../mooc/next-suggested-courses-email/application/send-next-suggested-courses-email/NextSuggestedCoursesEmailSender";
-import { SendNextSuggestedCoursesEmailOnUserCourseSuggestionsGenerated } from "../../../mooc/next-suggested-courses-email/application/send-next-suggested-courses-email/SendNextSuggestedCoursesEmailOnUserCourseSuggestionsGenerated";
-import { NextSuggestedCoursesEmailRealSender } from "../../../mooc/next-suggested-courses-email/domain/NextSuggestedCoursesEmailRealSender";
-import { ConsoleLogNextSuggestedCoursesEmailRealSender } from "../../../mooc/next-suggested-courses-email/infrastructure/ConsoleLogNextSuggestedCoursesEmailRealSender";
 import { UserCourseProgressCompleter } from "../../../mooc/user-course-progress/application/complete/UserCourseProgressCompleter";
 import { GenerateUserCourseSuggestionsOnUserCourseProgressCompleted } from "../../../mooc/user-course-suggestions/application/generate/GenerateUserCourseSuggestionsOnUserCourseProgressCompleted";
 import { UserCourseSuggestionsGenerator } from "../../../mooc/user-course-suggestions/application/generate/UserCourseSuggestionsGenerator";
@@ -75,18 +71,6 @@ builder.registerAndUse(UserCourseProgressCompleter);
 builder.register(CourseRepository).use(PostgresCourseRepository);
 builder.registerAndUse(PostgresCourseRepository);
 builder.registerAndUse(CoursesByIdsSearcher);
-
-// NextSuggestedCoursesEmail
-builder
-	.register(NextSuggestedCoursesEmailRealSender)
-	.use(ConsoleLogNextSuggestedCoursesEmailRealSender);
-
-builder.registerAndUse(NextSuggestedCoursesEmailSender);
-builder
-	.registerAndUse(
-		SendNextSuggestedCoursesEmailOnUserCourseSuggestionsGenerated,
-	)
-	.addTag("subscriber");
 
 // Export container
 export const container = builder.build();

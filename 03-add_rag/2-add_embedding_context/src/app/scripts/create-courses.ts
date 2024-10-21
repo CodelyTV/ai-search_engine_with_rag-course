@@ -8,8 +8,6 @@ import { PostgresConnection } from "../../contexts/shared/infrastructure/postgre
 
 import jsonCourses from "./courses.json";
 
-p;
-
 async function main(repository: PostgresCourseRepository): Promise<void> {
 	await Promise.all(
 		jsonCourses.map(async (jsonCourse) => {

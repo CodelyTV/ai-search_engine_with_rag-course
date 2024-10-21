@@ -1,5 +1,5 @@
 services:
-  poc_postgres_pgvector:
+  postgres_pgvector:
     image: pgvector/pgvector:0.7.4-pg16
     restart: always
 
