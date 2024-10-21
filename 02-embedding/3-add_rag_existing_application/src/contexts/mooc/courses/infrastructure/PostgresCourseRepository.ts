@@ -89,8 +89,7 @@ export class PostgresCourseRepository
 			SELECT id, name, summary, categories, published_at
 			FROM mooc.courses
 			WHERE id != ALL(${plainIds}::text[])
-			ORDER BY
-				(embedding <-> ${embeddings}::vector(768))
+			ORDER BY (embedding <-> ${embeddings})
 			LIMIT 10;
 		`;
 	}
@@ -122,7 +121,7 @@ export class PostgresCourseRepository
 			[this.serializeCourseForEmbedding(course)],
 		);
 
-		return `[${vectorEmbedding.join(",")}]`;
+		return JSON.stringify(vectorEmbedding);
 	}
 
 	private async generateCoursesQueryEmbeddings(
@@ -134,7 +133,7 @@ export class PostgresCourseRepository
 				.join("\n"),
 		);
 
-		return `[${vectorEmbedding.join(",")}]`;
+		return JSON.stringify(vectorEmbedding);
 	}
 
 	private serializeCourseForEmbedding(course: Primitives<Course>): string {

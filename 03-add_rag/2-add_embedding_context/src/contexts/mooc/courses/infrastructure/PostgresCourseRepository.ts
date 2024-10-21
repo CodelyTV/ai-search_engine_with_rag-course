@@ -123,7 +123,7 @@ export class PostgresCourseRepository
 		const vectorEmbedding = await this.embeddingsGenerator.embedQuery(
 			courses
 				.map((course) => this.serializeCourseForEmbedding(course))
-				.join(),
+				.join("\n"),
 		);
 
 		return JSON.stringify(vectorEmbedding);
