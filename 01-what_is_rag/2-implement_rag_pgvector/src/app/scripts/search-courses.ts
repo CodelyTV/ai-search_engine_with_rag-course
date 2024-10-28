@@ -15,7 +15,7 @@ async function main(
 	const results = await connection.sql`
 		SELECT name
 		FROM mooc.courses
-		ORDER BY (embedding <-> ${embedding})
+		ORDER BY (embedding <=> ${embedding})
 		LIMIT 3;
 	`;
 
