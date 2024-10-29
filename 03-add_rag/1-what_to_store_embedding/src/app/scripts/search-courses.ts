@@ -15,7 +15,7 @@ async function main(
 	const results = await pgConnection.sql`
 		SELECT name, summary, categories
 		FROM mooc.courses
-		ORDER BY (embedding <-> ${JSON.stringify(embedding)})
+		ORDER BY (embedding <=> ${JSON.stringify(embedding)})
 		LIMIT 3;
 	`;
 

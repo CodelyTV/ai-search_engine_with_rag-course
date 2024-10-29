@@ -39,7 +39,7 @@ async function main(
 		SELECT name, summary, categories
 		FROM mooc.courses
 		ORDER BY (embedding <-> ${JSON.stringify(embedding)})
-		LIMIT 3;
+		LIMIT 6;
 	`;
 
 	console.log(`For the query "${courseIds}" the results are:`, results);
