@@ -39,7 +39,7 @@ async function main(
 		SELECT name, summary, categories
 		FROM mooc.courses
 		WHERE id != ALL(${courseIds}::text[])
-		ORDER BY (embedding <-> ${JSON.stringify(embedding)})
+		ORDER BY (embedding <=> ${JSON.stringify(embedding)})
 		LIMIT 3;
 	`;
 

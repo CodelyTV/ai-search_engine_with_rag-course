@@ -84,7 +84,7 @@ export class PostgresCourseRepository
 			FROM mooc.courses
 			WHERE id != ALL(${plainIds}::text[])
 			ORDER BY
-				(embedding <-> ${embeddings}) +
+				(embedding <=> ${embeddings}) +
 				${recencyWeight} * EXTRACT(EPOCH FROM NOW() - published_at) / 86400
 			LIMIT 10;
 		`;
