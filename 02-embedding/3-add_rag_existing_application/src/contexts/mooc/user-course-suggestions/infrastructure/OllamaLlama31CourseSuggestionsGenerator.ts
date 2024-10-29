@@ -61,8 +61,8 @@ Eres un avanzado recomendador de cursos. Tu tarea es sugerir al usuario los 3 me
 - Tus sugerencias son en castellano neutro e inclusivo.
 - Proporciona una razón en castellano para cada curso sugerido. Ejemplo: "Porque has demostrado interés en PHP al completar el curso de DDD en PHP".
 - Intenta añadir en las razones cursos similares que el usuario ya ha completado.
+- Devuelves un array de objetos, cada uno con las propiedades "courseId" (string), "courseName" (string) y "reason" (string).
 - Responde únicamente con el siguiente formato JSON (no añadas \`\`\`json ni nada similar a la respuesta):
-
 {format_instructions}
         `.trim(),
 			),
@@ -105,6 +105,9 @@ Cursos que el usuario ya ha completado:
 	}
 
 	formatCourse(course: Course): string {
-		return `- ${course.name}`.trim();
+		return `
+- Id: ${course.id.value}
+  Nombre: ${course.name}
+		`.trim();
 	}
 }
