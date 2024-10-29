@@ -11,12 +11,14 @@ async function main(
 	connection: PostgresConnection,
 	embeddingsGenerator: OllamaEmbeddings,
 ): Promise<void> {
-	const embedding = `[${(await embeddingsGenerator.embedQuery(query)).join(",")}]`;
+	const embedding = JSON.stringify(
+		await embeddingsGenerator.embedQuery(query),
+	);
 
 	const results = await connection.sql`
 		SELECT id, name, summary, categories, published_at
 		FROM mooc.courses
-		ORDER BY (embedding <-> ${embedding})
+		ORDER BY (embedding <=> ${embedding})
 		LIMIT 3;
 	`;
 

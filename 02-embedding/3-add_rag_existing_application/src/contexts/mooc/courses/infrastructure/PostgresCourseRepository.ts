@@ -89,7 +89,7 @@ export class PostgresCourseRepository
 			SELECT id, name, summary, categories, published_at
 			FROM mooc.courses
 			WHERE id != ALL(${plainIds}::text[])
-			ORDER BY (embedding <-> ${embeddings})
+			ORDER BY (embedding <=> ${embeddings})
 			LIMIT 10;
 		`;
 	}
