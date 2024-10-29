@@ -38,8 +38,9 @@ async function main(
 	const results = await pgConnection.sql`
 		SELECT name, summary, categories
 		FROM mooc.courses
+		WHERE id != ALL(${courseIds}::text[])
 		ORDER BY (embedding <-> ${JSON.stringify(embedding)})
-		LIMIT 6;
+		LIMIT 3;
 	`;
 
 	console.log(`For the query "${courseIds}" the results are:`, results);
