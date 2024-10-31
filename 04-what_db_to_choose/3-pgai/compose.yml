@@ -1,6 +1,6 @@
 services:
   postgres_pgvector:
-    image: pgvector/pgvector:0.7.4-pg16
+    image: timescale/timescaledb-ha:pg16
     restart: always
 
     environment:
