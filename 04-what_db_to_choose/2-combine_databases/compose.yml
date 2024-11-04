@@ -1,5 +1,5 @@
 services:
-  poc_postgres_pgvector:
+  postgres_pgvector:
     image: pgvector/pgvector:0.7.4-pg16
     restart: always
 
@@ -10,8 +10,18 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
-      - ./databases:/docker-entrypoint-initdb.d
+      - ./databases/postgres:/docker-entrypoint-initdb.d
 
-volumes:
-  db_data:
+  mariadb:
+    image: mariadb:11
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: adminpassword
+      MYSQL_DATABASE: mooc
+      MYSQL_USER: codely
+      MYSQL_PASSWORD: c0d3ly7v
+      TZ: UTC
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./databases/mysql:/docker-entrypoint-initdb.d

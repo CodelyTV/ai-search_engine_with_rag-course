@@ -3,8 +3,8 @@ import { Primitives } from "@codelytv/primitives-type";
 import { OllamaEmbeddings } from "@langchain/ollama";
 import { Service } from "diod";
 
+import { MariaDBConnection } from "../../../shared/infrastructure/mariadb/MariaDBConnection";
 import { PostgresConnection } from "../../../shared/infrastructure/postgres/PostgresConnection";
-import { PostgresRepository } from "../../../shared/infrastructure/postgres/PostgresRepository";
 import { Course } from "../domain/Course";
 import { CourseId } from "../domain/CourseId";
 import { CourseRepository } from "../domain/CourseRepository";
@@ -18,15 +18,13 @@ type DatabaseCourseRow = {
 };
 
 @Service()
-export class PostgresCourseRepository
-	extends PostgresRepository<Course>
-	implements CourseRepository
-{
+export class MySqlCourseRepository implements CourseRepository {
 	private readonly embeddingsGenerator: OllamaEmbeddings;
 
-	constructor(connection: PostgresConnection) {
-		super(connection);
-
+	constructor(
+		private readonly connection: MariaDBConnection,
+		private readonly postgresConnection: PostgresConnection,
+	) {
 		this.embeddingsGenerator = new OllamaEmbeddings({
 			model: "nomic-embed-text",
 			baseUrl: "http://localhost:11434",
@@ -34,35 +32,41 @@ export class PostgresCourseRepository
 	}
 
 	async save(course: Course): Promise<void> {
-		const userPrimitives = course.toPrimitives();
+		const primitives = course.toPrimitives();
 		const embedding =
-			await this.generateCourseDocumentEmbedding(userPrimitives);
+			await this.generateCourseDocumentEmbedding(primitives);
 
-		await this.execute`
-			INSERT INTO mooc.courses (id, name, summary, categories, published_at, embedding)
+		await this.connection.execute(`
+			INSERT INTO mooc__courses (id, name, summary, categories, published_at)
 			VALUES (
-				${userPrimitives.id},
-				${userPrimitives.name},
-				${userPrimitives.summary},
-				${userPrimitives.categories},
-				${userPrimitives.publishedAt},
-				${embedding}
+				'${primitives.id}',
+				'${primitives.name}',
+				'${primitives.summary}',
+				'${JSON.stringify(primitives.categories)}',
+				'${primitives.publishedAt.toISOString().slice(0, 19).replace("T", " ")}'
 			)
-			ON CONFLICT (id) DO UPDATE SET
-				name = EXCLUDED.name,
-				summary = EXCLUDED.summary,
-				categories = EXCLUDED.categories,
-				published_at = EXCLUDED.published_at,
-				embedding = EXCLUDED.embedding;
+			ON DUPLICATE KEY UPDATE
+				name = VALUES(name),
+				summary = VALUES(summary),
+				categories = VALUES(categories),
+				published_at = VALUES(published_at);
+		`);
+
+		await this.postgresConnection.sql`
+			INSERT INTO mooc.courses (id, embedding)
+			VALUES (${primitives.id}, ${embedding})
+			ON CONFLICT (id) DO UPDATE SET embedding = EXCLUDED.embedding;
 		`;
 	}
 
 	async search(id: CourseId): Promise<Course | null> {
-		return await this.searchOne`
+		const row = await this.connection.searchOne<DatabaseCourseRow>(`
 			SELECT id, name, summary, categories, published_at
-			FROM mooc.courses
-			WHERE id = ${id.value};
-		`;
+			FROM mooc__courses
+			WHERE id = '${id.value}';
+		`);
+
+		return row ? this.toAggregate(row) : null;
 	}
 
 	async searchSimilar(ids: CourseId[]): Promise<Course[]> {
@@ -77,27 +81,30 @@ export class PostgresCourseRepository
 		);
 
 		const plainIds = ids.map((id) => id.value);
-		const recencyWeight = 0.001;
 
-		return await this.searchMany`
-			SELECT id, name, summary, categories, published_at
+		const idRows = (await this.postgresConnection.sql`
+			SELECT id
 			FROM mooc.courses
 			WHERE id != ALL(${plainIds}::text[])
-			ORDER BY
-				(embedding <=> ${embeddings}) +
-				${recencyWeight} * EXTRACT(EPOCH FROM NOW() - published_at) / 86400
+			ORDER BY embedding <=> ${embeddings}
 			LIMIT 10;
-		`;
+		`) as { id: string }[];
+
+		return await this.searchByIds(
+			idRows.map((row) => new CourseId(row.id)),
+		);
 	}
 
 	async searchByIds(ids: CourseId[]): Promise<Course[]> {
 		const plainIds = ids.map((id) => id.value);
 
-		return await this.searchMany`
+		const rows = await this.connection.searchAll<DatabaseCourseRow>(`
 			SELECT id, name, summary, categories, published_at
-			FROM mooc.courses
-			WHERE id = ANY(${plainIds}::text[]);
-		`;
+			FROM mooc__courses
+			WHERE id IN (${plainIds.map((id) => `'${id}'`).join(", ")});
+		`);
+
+		return rows.map(this.toAggregate);
 	}
 
 	protected toAggregate(row: DatabaseCourseRow): Course {

@@ -2,7 +2,7 @@ import { ContainerBuilder } from "diod";
 
 import { CoursesByIdsSearcher } from "../../../mooc/courses/application/search-by-ids/CoursesByIdsSearcher";
 import { CourseRepository } from "../../../mooc/courses/domain/CourseRepository";
-import { PostgresCourseRepository } from "../../../mooc/courses/infrastructure/PostgresCourseRepository";
+import { MySqlCourseRepository } from "../../../mooc/courses/infrastructure/MySqlCourseRepository";
 import { UserCourseProgressCompleter } from "../../../mooc/user-course-progress/application/complete/UserCourseProgressCompleter";
 import { GenerateUserCourseSuggestionsOnUserCourseProgressCompleted } from "../../../mooc/user-course-suggestions/application/generate/GenerateUserCourseSuggestionsOnUserCourseProgressCompleted";
 import { UserCourseSuggestionsGenerator } from "../../../mooc/user-course-suggestions/application/generate/UserCourseSuggestionsGenerator";
@@ -19,6 +19,7 @@ import { UserRepository } from "../../../mooc/users/domain/UserRepository";
 import { PostgresUserRepository } from "../../../mooc/users/infrastructure/PostgresUserRepository";
 import { EventBus } from "../../domain/event/EventBus";
 import { InMemoryEventBus } from "../domain-event/InMemoryEventBus";
+import { MariaDBConnection } from "../mariadb/MariaDBConnection";
 import { PostgresConnection } from "../postgres/PostgresConnection";
 
 const builder = new ContainerBuilder();
@@ -36,6 +37,8 @@ builder
 		);
 	})
 	.asSingleton();
+
+builder.registerAndUse(MariaDBConnection).asSingleton();
 
 builder.register(EventBus).use(InMemoryEventBus);
 
@@ -68,8 +71,8 @@ builder
 builder.registerAndUse(UserCourseProgressCompleter);
 
 // Course
-builder.register(CourseRepository).use(PostgresCourseRepository);
-builder.registerAndUse(PostgresCourseRepository);
+builder.register(CourseRepository).use(MySqlCourseRepository);
+builder.registerAndUse(MySqlCourseRepository);
 builder.registerAndUse(CoursesByIdsSearcher);
 
 // Export container
