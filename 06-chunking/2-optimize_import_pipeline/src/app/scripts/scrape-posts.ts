@@ -6,25 +6,54 @@ import {
 	DistanceStrategy,
 	PGVectorStore,
 } from "@langchain/community/vectorstores/pgvector";
-import { OllamaEmbeddings } from "@langchain/ollama";
+import { Document } from "@langchain/core/documents";
+import { ChatOllama, OllamaEmbeddings } from "@langchain/ollama";
 import { DirectoryLoader } from "langchain/document_loaders/fs/directory";
 import { PoolConfig } from "pg";
 
-async function main(vectorStorePromise: Promise<PGVectorStore>): Promise<void> {
+async function main(
+	vectorStorePromise: Promise<PGVectorStore>,
+	llm: ChatOllama,
+): Promise<void> {
 	const directoryLoader = new DirectoryLoader("./codely", {
 		".pdf": (path: string): PDFLoader =>
 			new PDFLoader(path, {
-				// splitPages: false,
+				splitPages: false,
 			}),
 	});
 
 	const documents = await directoryLoader.load();
 
+	const formattedDocuments = await Promise.all(
+		documents.map(async (document) => {
+			const content = await llm.invoke(
+				`
+Resume el siguiente contenido en 3 frases siguiendo estas reglas:
+ * Devuelve directamente el texto, no digas gracias ni nada por el estilo.
+ * No digas lo siento.
+ * No incluyas información que no esté en el texto.
+ * Haz el resumen en castellano.
+ * No digas que no tienes información, siempre puedes hacer un resumen.
+
+El texto a resumir:
+\`\`\`
+${document.pageContent}
+\`\`\`
+`.trim(),
+			);
+
+			return new Document({
+				pageContent: content.content as string,
+				metadata: document.metadata,
+			});
+		}),
+	);
+
 	console.log(documents);
 
 	const vectorStore = await vectorStorePromise;
 
-	await vectorStore.addDocuments(documents);
+	await vectorStore.addDocuments(formattedDocuments);
 	await vectorStore.end();
 }
 
@@ -52,8 +81,9 @@ const vectorStore = PGVectorStore.initialize(
 		distanceStrategy: "cosine" as DistanceStrategy,
 	},
 );
+const llm = new ChatOllama({ model: "llama3.1:8b", temperature: 5 });
 
-main(vectorStore)
+main(vectorStore, llm)
 	.catch((error) => {
 		console.error(error);
 		process.exit(1);
