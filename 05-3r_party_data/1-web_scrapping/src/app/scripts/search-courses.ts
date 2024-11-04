@@ -1,43 +1,60 @@
 /* eslint-disable no-console */
 import "reflect-metadata";
 
+import {
+	DistanceStrategy,
+	PGVectorStore,
+} from "@langchain/community/vectorstores/pgvector";
 import { OllamaEmbeddings } from "@langchain/ollama";
-
-import { PostgresConnection } from "../PostgresConnection";
+import { PoolConfig } from "pg";
 
 async function main(
 	query: string,
-	pgConnection: PostgresConnection,
-	embeddingsGenerator: OllamaEmbeddings,
+	vectorStorePromise: Promise<PGVectorStore>,
 ): Promise<void> {
-	const embedding = await embeddingsGenerator.embedQuery(query);
+	const vectorStore = await vectorStorePromise;
 
-	const results = await pgConnection.sql`
-		SELECT name, summary, categories
-		FROM mooc.courses
-		ORDER BY (embedding <=> ${JSON.stringify(embedding)})
-		LIMIT 3;
-	`;
+	const similaritySearchResults = await vectorStore.similaritySearch(
+		query,
+		2,
+	);
 
-	console.log(`For the query "${query}" the results are:`, results);
+	console.log(
+		`For the query "${query}" the results are:`,
+		similaritySearchResults.map((result) => result.metadata),
+	);
+
+	await vectorStore.end();
 }
 
-const pgConnection = new PostgresConnection(
-	"localhost",
-	5432,
-	"codely",
-	"c0d3ly7v",
-	"postgres",
+const vectorStore = PGVectorStore.initialize(
+	new OllamaEmbeddings({
+		model: "nomic-embed-text",
+		baseUrl: "http://localhost:11434",
+	}),
+	{
+		postgresConnectionOptions: {
+			type: "postgres",
+			host: "localhost",
+			port: 5432,
+			user: "codely",
+			password: "c0d3ly7v",
+			database: "postgres",
+		} as PoolConfig,
+		tableName: "mooc.courses",
+		columns: {
+			idColumnName: "id",
+			contentColumnName: "content",
+			metadataColumnName: "metadata",
+			vectorColumnName: "embedding",
+		},
+		distanceStrategy: "cosine" as DistanceStrategy,
+	},
 );
-const embeddingsGenerator = new OllamaEmbeddings({
-	model: "nomic-embed-text",
-	baseUrl: "http://localhost:11434",
-});
 
-main(process.argv[2], pgConnection, embeddingsGenerator)
+main(process.argv[2], vectorStore)
 	.catch(console.error)
 	.finally(async () => {
-		await pgConnection.end();
 		console.log("Done!");
 
 		process.exit(0);

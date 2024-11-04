@@ -1,7 +1,13 @@
 /* eslint-disable no-console */
 import "reflect-metadata";
 
+import {
+	DistanceStrategy,
+	PGVectorStore,
+} from "@langchain/community/vectorstores/pgvector";
 import { Document } from "@langchain/core/documents";
+import { OllamaEmbeddings } from "@langchain/ollama";
+import { PoolConfig } from "pg";
 import { chromium } from "playwright";
 
 // import { RecursiveUrlLoader } from "@langchain/community/document_loaders/web/recursive_url";
@@ -38,6 +44,7 @@ async function scrapeCourse(url: string): Promise<Document> {
 			);
 
 			const formattedSteps = Array.from(steps)
+				.slice(0, 20)
 				.map((step) => {
 					return `* ${step.textContent}: ${step.href}`;
 				})
@@ -55,7 +62,7 @@ ${formattedSteps}
 		});
 
 		return new Document({
-			id: courseId,
+			id: courseId, // has to be an uuid
 			pageContent: content,
 			metadata: { url },
 		});
@@ -64,10 +71,18 @@ ${formattedSteps}
 	}
 }
 
-async function main(courseUrls: string[]): Promise<void> {
-	const docs = await Promise.all(courseUrls.map(scrapeCourse));
+async function main(
+	courseUrls: string[],
+	vectorStorePromise: Promise<PGVectorStore>,
+): Promise<void> {
+	const documents = await Promise.all(courseUrls.map(scrapeCourse));
 
-	console.log(docs);
+	console.log(documents);
+
+	const vectorStore = await vectorStorePromise;
+
+	await vectorStore.addDocuments(documents);
+	await vectorStore.end();
 }
 
 const courseUrls = [
@@ -82,7 +97,32 @@ const courseUrls = [
 	"http://localhost:3012/tratamiento-de-datos-en-bash-gestiona-archivos-json-xml-yaml.html",
 ];
 
-main(courseUrls)
+const vectorStore = PGVectorStore.initialize(
+	new OllamaEmbeddings({
+		model: "nomic-embed-text",
+		baseUrl: "http://localhost:11434",
+	}),
+	{
+		postgresConnectionOptions: {
+			type: "postgres",
+			host: "localhost",
+			port: 5432,
+			user: "codely",
+			password: "c0d3ly7v",
+			database: "postgres",
+		} as PoolConfig,
+		tableName: "mooc.courses",
+		columns: {
+			idColumnName: "id",
+			contentColumnName: "content",
+			metadataColumnName: "metadata",
+			vectorColumnName: "embedding",
+		},
+		distanceStrategy: "cosine" as DistanceStrategy,
+	},
+);
+
+main(courseUrls, vectorStore)
 	.catch((error) => {
 		console.error(error);
 		process.exit(1);
