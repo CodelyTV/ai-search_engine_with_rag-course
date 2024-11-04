@@ -11,10 +11,3 @@ services:
       - "5432:5432"
     volumes:
       - ./databases:/docker-entrypoint-initdb.d
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "3012:80"
-    volumes:
-      - ./codely:/usr/share/nginx/html

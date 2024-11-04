@@ -5,9 +5,8 @@
 	"scripts": {
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
-		"scrape-courses": "ts-node ./src/app/scripts/scrape-courses.ts",
-		"search-courses": "ts-node ./src/app/scripts/search-courses.ts",
-		"search-courses-declarative": "ts-node ./src/app/scripts/search-courses-declarative.ts"
+		"scrape-posts": "ts-node ./src/app/scripts/scrape-posts.ts",
+		"search-posts": "ts-node ./src/app/scripts/search-posts.ts"
 	},
 	"dependencies": {
 		"@langchain/community": "^0.3.11",
@@ -19,6 +18,7 @@
 		"langchain": "^0.3.2",
 		"mariadb": "^3.3.1",
 		"modelfusion": "^0.137.0",
+		"pdf-parse": "^1.1.1",
 		"pg": "^8.13.1",
 		"pgvector": "^0.2.0",
 		"playwright": "^1.48.2",
