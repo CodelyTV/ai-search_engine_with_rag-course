@@ -23,6 +23,8 @@ async function scrapeCourse(url: string): Promise<Document> {
 	const browser = await chromium.launch({ headless: true });
 	const page = await browser.newPage();
 
+	const courseId = url.split("/").pop()?.replace(".html", "") ?? "";
+
 	try {
 		await page.goto(url);
 
@@ -52,35 +54,35 @@ ${formattedSteps}
 `.trim();
 		});
 
-		return new Document({ pageContent: content });
+		return new Document({
+			id: courseId,
+			pageContent: content,
+			metadata: { url },
+		});
 	} finally {
 		await browser.close();
 	}
 }
 
-async function main(): Promise<void> {
-	const urls = [
-		"http://localhost:3012/anade-inteligencia-artificial-siguiendo-buenas-practicas.html",
-		"http://localhost:3012/asincronia-en-javascript.html",
-		"http://localhost:3012/auditoria-holaluz.html",
-		"http://localhost:3012/ddd-microservicios-e-infra-en-audiense-genially-y-codely.html",
-		"http://localhost:3012/diseno-de-infraestructura-aws-sqs-como-cola-de-mensajeria.html",
-		"http://localhost:3012/diseno-de-infraestructura-rabbitmq-como-cola-de-mensajeria.html",
-		"http://localhost:3012/modelado-del-dominio-value-objects.html",
-		"http://localhost:3012/patrones-de-diseno-criteria.html",
-		"http://localhost:3012/tratamiento-de-datos-en-bash-gestiona-archivos-json-xml-yaml.html",
-	];
-
-	const docs = await Promise.all(
-		urls.map((url) => {
-			return scrapeCourse(url);
-		}),
-	);
+async function main(courseUrls: string[]): Promise<void> {
+	const docs = await Promise.all(courseUrls.map(scrapeCourse));
 
 	console.log(docs);
 }
 
-main()
+const courseUrls = [
+	"http://localhost:3012/anade-inteligencia-artificial-siguiendo-buenas-practicas.html",
+	"http://localhost:3012/asincronia-en-javascript.html",
+	"http://localhost:3012/auditoria-holaluz.html",
+	"http://localhost:3012/ddd-microservicios-e-infra-en-audiense-genially-y-codely.html",
+	"http://localhost:3012/diseno-de-infraestructura-aws-sqs-como-cola-de-mensajeria.html",
+	"http://localhost:3012/diseno-de-infraestructura-rabbitmq-como-cola-de-mensajeria.html",
+	"http://localhost:3012/modelado-del-dominio-value-objects.html",
+	"http://localhost:3012/patrones-de-diseno-criteria.html",
+	"http://localhost:3012/tratamiento-de-datos-en-bash-gestiona-archivos-json-xml-yaml.html",
+];
+
+main(courseUrls)
 	.catch((error) => {
 		console.error(error);
 		process.exit(1);
