@@ -6,7 +6,8 @@
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"scrape-courses": "ts-node ./src/app/scripts/scrape-courses.ts",
-		"search-courses": "ts-node ./src/app/scripts/search-courses.ts"
+		"search-courses": "ts-node ./src/app/scripts/search-courses.ts",
+		"search-courses-declarative": "ts-node ./src/app/scripts/search-courses-declarative.ts"
 	},
 	"dependencies": {
 		"@langchain/community": "^0.3.11",

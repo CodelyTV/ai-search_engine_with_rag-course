@@ -62,7 +62,7 @@ ${formattedSteps}
 		});
 
 		return new Document({
-			id: courseId, // has to be an uuid
+			id: courseId, // uuid
 			pageContent: content,
 			metadata: { url },
 		});

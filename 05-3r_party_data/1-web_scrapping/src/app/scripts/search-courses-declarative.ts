@@ -7,9 +7,13 @@ import {
 } from "@langchain/community/vectorstores/pgvector";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
+import {
+	RunnablePassthrough,
+	RunnableSequence,
+} from "@langchain/core/runnables";
 import { ChatOllama, OllamaEmbeddings } from "@langchain/ollama";
-import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { pull } from "langchain/hub";
+import { formatDocumentsAsString } from "langchain/util/document";
 import { PoolConfig } from "pg";
 
 async function main(
@@ -18,31 +22,17 @@ async function main(
 ): Promise<void> {
 	const vectorStore = await vectorStorePromise;
 
-	const similarCourses = await vectorStore.similaritySearch(query, 2);
+	const declarativeRagChain = RunnableSequence.from([
+		{
+			context: vectorStore.asRetriever().pipe(formatDocumentsAsString),
+			question: new RunnablePassthrough(),
+		},
+		await pull<ChatPromptTemplate>("rlm/rag-prompt"),
+		new ChatOllama({ model: "llama3.1:8b", temperature: 5 }),
+		new StringOutputParser(),
+	]);
 
-	console.log(
-		`For the query "${query}" the results are:`,
-		similarCourses.map((result) => result.metadata),
-	);
-
-	// https://smith.langchain.com/hub/rlm/rag-prompt
-	const prompt = await pull<ChatPromptTemplate>("rlm/rag-prompt");
-
-	const llm = new ChatOllama({ model: "llama3.1:8b", temperature: 5 });
-
-	const ragChain = await createStuffDocumentsChain({
-		llm,
-		prompt,
-		outputParser: new StringOutputParser(),
-	});
-
-	const retriever = vectorStore.asRetriever();
-	const retrievedDocs = await retriever.invoke(query);
-
-	const response = await ragChain.invoke({
-		question: query,
-		context: retrievedDocs,
-	});
+	const response = await declarativeRagChain.invoke(query);
 
 	console.log(response);
 
