@@ -10,8 +10,11 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
       - ./databases:/docker-entrypoint-initdb.d
 
-volumes:
-  db_data:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "3012:80"
+    volumes:
+      - ./codely:/usr/share/nginx/html

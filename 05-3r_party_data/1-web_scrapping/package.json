@@ -5,15 +5,16 @@
 	"scripts": {
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
-		"create-courses": "ts-node ./src/app/scripts/create-courses.ts",
-		"search-courses": "ts-node ./src/app/scripts/search-courses.ts",
-		"search-courses-by-ids-documents": "ts-node ./src/app/scripts/search-courses-by-ids-documents.ts",
-		"search-courses-by-ids": "ts-node ./src/app/scripts/search-courses-by-ids.ts"
+		"scrape-courses": "ts-node ./src/app/scripts/scrape-courses.ts",
+		"search-courses": "ts-node ./src/app/scripts/search-courses.ts"
 	},
 	"dependencies": {
-		"@langchain/core": "^0.3.1",
+		"@langchain/community": "^0.3.11",
+		"@langchain/core": "^0.3.17",
 		"@langchain/ollama": "^0.1.0",
 		"diod": "^2.0.0",
+		"html-to-text": "^9.0.5",
+		"jsdom": "^25.0.1",
 		"langchain": "^0.3.2",
 		"mariadb": "^3.3.1",
 		"modelfusion": "^0.137.0",
@@ -26,6 +27,7 @@
 	"devDependencies": {
 		"@codelytv/primitives-type": "^1.1.1",
 		"@next/eslint-plugin-next": "^14.2.11",
+		"@types/html-to-text": "^9.0.4",
 		"@types/node": "^22",
 		"@types/uuid": "^10.0.0",
 		"eslint": "^8",
