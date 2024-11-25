@@ -9,7 +9,7 @@
 </p>
 
 <h1 align="center">
-    {COURSE_EMOJI} {COURSE_NAME_IN_ENGLISH}
+    🕵️ AI: Search engine using RAG
 </h1>
 
 <p align="center">
@@ -18,10 +18,10 @@
 </p>
 
 <p align="center">
-    {COURSE_SUMMARY_IN_ENGLISH}
+    AI: Search engine using RAG
 </p>
 
 <p align="center">
-  <a href="https://github.com/CodelyTV/{REPOSITORY_NAME}/stargazers">Stars are welcome 😊</a><br><br>
-  Course (Spanish): <a href="{COURSE_URL}">{COURSE_NAME_IN_SPANISH}</a>
+  <a href="https://github.com/CodelyTV/ai-search_engine_with_rag-course/stargazers">Stars are welcome 😊</a><br><br>
+  Course (Spanish): <a href="https://pro.codely.com/library/ia-buscador-con-datos-propios-usando-rag-230838">IA: Buscador con datos propios usando RAG</a>
 </p>
