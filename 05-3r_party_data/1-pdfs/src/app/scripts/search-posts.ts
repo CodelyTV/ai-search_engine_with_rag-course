@@ -7,13 +7,9 @@ import {
 } from "@langchain/community/vectorstores/pgvector";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import {
-	RunnablePassthrough,
-	RunnableSequence,
-} from "@langchain/core/runnables";
 import { ChatOllama, OllamaEmbeddings } from "@langchain/ollama";
+import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { pull } from "langchain/hub";
-import { formatDocumentsAsString } from "langchain/util/document";
 import { PoolConfig } from "pg";
 
 async function main(
@@ -22,17 +18,16 @@ async function main(
 ): Promise<void> {
 	const vectorStore = await vectorStorePromise;
 
-	const declarativeRagChain = RunnableSequence.from([
-		{
-			context: vectorStore.asRetriever().pipe(formatDocumentsAsString),
-			question: new RunnablePassthrough(),
-		},
-		await pull<ChatPromptTemplate>("rlm/rag-prompt"),
-		new ChatOllama({ model: "llama3.1:8b", temperature: 1 }),
-		new StringOutputParser(),
-	]);
+	const ragChain = await createStuffDocumentsChain({
+		llm: new ChatOllama({ model: "llama3.1:8b", temperature: 1 }),
+		prompt: await pull<ChatPromptTemplate>("rlm/rag-prompt"),
+		outputParser: new StringOutputParser(),
+	});
 
-	const response = await declarativeRagChain.invoke(query);
+	const response = await ragChain.invoke({
+		question: query,
+		context: await vectorStore.asRetriever().invoke(query),
+	});
 
 	console.log(response);
 

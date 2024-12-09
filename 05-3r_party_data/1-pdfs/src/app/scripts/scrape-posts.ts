@@ -12,10 +12,7 @@ import { PoolConfig } from "pg";
 
 async function main(vectorStorePromise: Promise<PGVectorStore>): Promise<void> {
 	const directoryLoader = new DirectoryLoader("./codely", {
-		".pdf": (path: string): PDFLoader =>
-			new PDFLoader(path, {
-				// splitPages: false,
-			}),
+		".pdf": (path: string): PDFLoader => new PDFLoader(path),
 	});
 
 	const documents = await directoryLoader.load();
