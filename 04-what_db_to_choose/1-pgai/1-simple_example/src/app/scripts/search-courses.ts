@@ -9,10 +9,10 @@ async function main(
 ): Promise<void> {
 	const results = await pgConnection.sql`
 		SELECT
-		  name,
-		  summary,
-		  categories,
-		  embedding <=>  ai.ollama_embed('nomic-embed-text', ${query}, host => 'http://host.docker.internal:11434') as distance
+			name,
+			summary,
+			categories,
+			embedding <=>  ai.ollama_embed('nomic-embed-text', ${query}, host => 'http://host.docker.internal:11434') as distance
 		FROM mooc.courses_embedding
 		ORDER BY distance
 		LIMIT 3;
