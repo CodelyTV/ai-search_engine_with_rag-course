@@ -1,34 +1,20 @@
 /* eslint-disable no-console */
 import "reflect-metadata";
 
-import { OllamaEmbeddings } from "@langchain/ollama";
-
 import { PostgresConnection } from "../PostgresConnection";
 
 import jsonCourses from "./courses.json";
 
-async function main(
-	pgConnection: PostgresConnection,
-	embeddingsGenerator: OllamaEmbeddings,
-): Promise<void> {
+async function main(pgConnection: PostgresConnection): Promise<void> {
 	await Promise.all(
 		jsonCourses.map(async (jsonCourse) => {
-			const [embedding] = await embeddingsGenerator.embedDocuments([
-				[
-					`Name: ${jsonCourse.name}`,
-					`Summary: ${jsonCourse.summary}`,
-					`Categories: ${jsonCourse.categories.join(", ")}`,
-				].join("|"),
-			]);
-
 			await pgConnection.sql`
-				INSERT INTO mooc.courses (id, name, summary, categories, embedding)
+				INSERT INTO mooc.courses (id, name, summary, categories)
 				VALUES (
 					${jsonCourse.id},
 					${jsonCourse.name},
 					${jsonCourse.summary},
-					${jsonCourse.categories},
-					${JSON.stringify(embedding)}
+					${jsonCourse.categories}
 				);
 			`;
 		}),
@@ -43,12 +29,7 @@ const pgConnection = new PostgresConnection(
 	"postgres",
 );
 
-const embeddingsGenerator = new OllamaEmbeddings({
-	model: "nomic-embed-text",
-	baseUrl: "http://localhost:11434",
-});
-
-main(pgConnection, embeddingsGenerator)
+main(pgConnection)
 	.catch((error) => {
 		console.error(error);
 		process.exit(1);

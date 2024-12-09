@@ -1,21 +1,20 @@
 /* eslint-disable no-console */
 import "reflect-metadata";
 
-import { OllamaEmbeddings } from "@langchain/ollama";
-
 import { PostgresConnection } from "../PostgresConnection";
 
 async function main(
 	query: string,
 	pgConnection: PostgresConnection,
-	embeddingsGenerator: OllamaEmbeddings,
 ): Promise<void> {
-	const embedding = await embeddingsGenerator.embedQuery(query);
-
 	const results = await pgConnection.sql`
-		SELECT name, summary, categories
-		FROM mooc.courses
-		ORDER BY (embedding <=> ${JSON.stringify(embedding)})
+		SELECT
+		  name,
+		  summary,
+		  categories,
+		  embedding <=>  ai.ollama_embed('nomic-embed-text', ${query}, host => 'http://host.docker.internal:11434') as distance
+		FROM mooc.courses_embedding
+		ORDER BY distance
 		LIMIT 3;
 	`;
 
@@ -29,12 +28,8 @@ const pgConnection = new PostgresConnection(
 	"c0d3ly7v",
 	"postgres",
 );
-const embeddingsGenerator = new OllamaEmbeddings({
-	model: "nomic-embed-text",
-	baseUrl: "http://localhost:11434",
-});
 
-main(process.argv[2], pgConnection, embeddingsGenerator)
+main(process.argv[2], pgConnection)
 	.catch(console.error)
 	.finally(async () => {
 		await pgConnection.end();

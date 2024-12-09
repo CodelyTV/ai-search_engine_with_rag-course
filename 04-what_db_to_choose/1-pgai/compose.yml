@@ -1,6 +1,6 @@
 services:
-  postgres_pgvector:
-    image: timescale/timescaledb-ha:pg16
+  postgres_pgai:
+    image: timescale/timescaledb-ha:pg17
     restart: always
 
     environment:
@@ -12,6 +12,13 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./databases:/docker-entrypoint-initdb.d
+
+  pgai-vectorizer_worker:
+    image: timescale/pgai-vectorizer-worker:v0.2.1
+    environment:
+      PGAI_VECTORIZER_WORKER_DB_URL: postgres://codely:c0d3ly7v@postgres_pgai:5432/postgres
+      OLLAMA_HOST: http://host.docker.internal:11434
+    command: [ "--poll-interval", "5s" ]
 
 volumes:
   db_data:
