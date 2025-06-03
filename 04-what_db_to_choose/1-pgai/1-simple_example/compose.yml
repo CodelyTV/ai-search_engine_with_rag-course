@@ -1,8 +1,7 @@
 services:
   postgres_pgai:
-    image: timescale/timescaledb-ha:pg17
-    restart: always
-
+    image: timescale/timescaledb-ha:pg17-ts2.17
+    restart: unless-stopped
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: codely
@@ -15,6 +14,7 @@ services:
 
   pgai-vectorizer_worker:
     image: timescale/pgai-vectorizer-worker:v0.2.1
+    restart: unless-stopped
     environment:
       PGAI_VECTORIZER_WORKER_DB_URL: postgres://codely:c0d3ly7v@postgres_pgai:5432/postgres
       OLLAMA_HOST: http://host.docker.internal:11434

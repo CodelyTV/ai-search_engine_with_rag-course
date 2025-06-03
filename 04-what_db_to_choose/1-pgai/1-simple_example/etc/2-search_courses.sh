@@ -1,4 +1,4 @@
-npm run search-courses-by-ids -- 3rr0,tx4n,c4ch
+npm run search-courses -- "errores"
 
 ### Courses
 # cl3c: Clean Code
