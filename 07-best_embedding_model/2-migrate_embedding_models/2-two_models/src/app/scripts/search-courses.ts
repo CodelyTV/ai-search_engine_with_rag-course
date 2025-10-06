@@ -17,7 +17,7 @@ async function main(
 	const nomicResults = await connection.sql`
 		SELECT name
 		FROM mooc.courses
-		ORDER BY (embedding <-> ${nomicEmbedding})
+		ORDER BY (embedding <=> ${nomicEmbedding})
 		LIMIT 3;
 	`;
 
@@ -26,12 +26,12 @@ async function main(
 	const gemmaResults = await connection.sql`
 		SELECT name
 		FROM mooc.courses
-		ORDER BY (embedding_gemma <-> ${gemmaEmbedding})
+		ORDER BY (embedding_gemma <=> ${gemmaEmbedding})
 		LIMIT 3;
 	`;
 
 	console.log("Top 3 results for nomic:", nomicResults);
-	console.log("Top 3 results for gemma:", gemmaResults);
+	console.log("\nTop 3 results for gemma:", gemmaResults);
 }
 
 const pgConnection = container.get(PostgresConnection);
