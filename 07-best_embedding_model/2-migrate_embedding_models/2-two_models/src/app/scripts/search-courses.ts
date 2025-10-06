@@ -9,28 +9,49 @@ import { PostgresConnection } from "../../contexts/shared/infrastructure/postgre
 async function main(
 	query: string,
 	connection: PostgresConnection,
-	embeddingsGenerator: OllamaEmbeddings,
+	nomicEmbeddingsGenerator: OllamaEmbeddings,
+	gemmaEmbeddingsGenerator: OllamaEmbeddings,
 ): Promise<void> {
-	const embedding = `[${(await embeddingsGenerator.embedQuery(query)).join(",")}]`;
+	const nomicEmbedding = `[${(await nomicEmbeddingsGenerator.embedQuery(query)).join(",")}]`;
 
-	const results = await connection.sql`
-		SELECT id, name, summary, categories, published_at
+	const nomicResults = await connection.sql`
+		SELECT name
 		FROM mooc.courses
-		ORDER BY (embedding <-> ${embedding})
+		ORDER BY (embedding <-> ${nomicEmbedding})
 		LIMIT 3;
 	`;
 
-	console.log(`For the query "${query}" the results are:`, results);
+	const gemmaEmbedding = `[${(await gemmaEmbeddingsGenerator.embedQuery(query)).join(",")}]`;
+
+	const gemmaResults = await connection.sql`
+		SELECT name
+		FROM mooc.courses
+		ORDER BY (embedding_gemma <-> ${gemmaEmbedding})
+		LIMIT 3;
+	`;
+
+	console.log("Top 3 results for nomic:", nomicResults);
+	console.log("Top 3 results for gemma:", gemmaResults);
 }
 
 const pgConnection = container.get(PostgresConnection);
 
-const embeddingsGenerator = new OllamaEmbeddings({
+const nomicEmbeddingsGenerator = new OllamaEmbeddings({
 	model: "nomic-embed-text",
 	baseUrl: "http://localhost:11434",
 });
 
-main(process.argv[2], pgConnection, embeddingsGenerator)
+const gemmaEmbeddingsGenerator = new OllamaEmbeddings({
+	model: "embeddinggemma:300m",
+	baseUrl: "http://localhost:11434",
+});
+
+main(
+	process.argv[2],
+	pgConnection,
+	nomicEmbeddingsGenerator,
+	gemmaEmbeddingsGenerator,
+)
 	.catch(console.error)
 	.finally(async () => {
 		await pgConnection.end();

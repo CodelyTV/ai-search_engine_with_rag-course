@@ -22,38 +22,52 @@ export class PostgresCourseRepository
 	extends PostgresRepository<Course>
 	implements CourseRepository
 {
-	private readonly embeddingsGenerator: OllamaEmbeddings;
+	private readonly nomicEmbeddingsGenerator: OllamaEmbeddings;
+	private readonly gemmaEmbeddingsGenerator: OllamaEmbeddings;
 
 	constructor(connection: PostgresConnection) {
 		super(connection);
 
-		this.embeddingsGenerator = new OllamaEmbeddings({
+		this.nomicEmbeddingsGenerator = new OllamaEmbeddings({
 			model: "nomic-embed-text",
+			baseUrl: "http://localhost:11434",
+		});
+
+		this.gemmaEmbeddingsGenerator = new OllamaEmbeddings({
+			model: "embeddinggemma:300m",
 			baseUrl: "http://localhost:11434",
 		});
 	}
 
 	async save(course: Course): Promise<void> {
 		const userPrimitives = course.toPrimitives();
-		const embedding =
-			await this.generateCourseDocumentEmbedding(userPrimitives);
+		const nomicEmbedding = await this.generateCourseDocumentEmbedding(
+			this.nomicEmbeddingsGenerator,
+			userPrimitives,
+		);
+		const gemmaEmbedding = await this.generateCourseDocumentEmbedding(
+			this.gemmaEmbeddingsGenerator,
+			userPrimitives,
+		);
 
 		await this.execute`
-			INSERT INTO mooc.courses (id, name, summary, categories, published_at, embedding)
+			INSERT INTO mooc.courses (id, name, summary, categories, published_at, embedding, embedding_gemma)
 			VALUES (
 				${userPrimitives.id},
 				${userPrimitives.name},
 				${userPrimitives.summary},
 				${userPrimitives.categories},
 				${userPrimitives.publishedAt},
-				${embedding}
+				${nomicEmbedding},
+				${gemmaEmbedding}
 			)
 			ON CONFLICT (id) DO UPDATE SET
 				name = EXCLUDED.name,
 				summary = EXCLUDED.summary,
 				categories = EXCLUDED.categories,
 				published_at = EXCLUDED.published_at,
-				embedding = EXCLUDED.embedding;
+				embedding = EXCLUDED.embedding,
+				embedding_gemma = EXCLUDED.embedding_gemma;
 		`;
 	}
 
@@ -66,13 +80,18 @@ export class PostgresCourseRepository
 	}
 
 	async searchSimilar(ids: CourseId[]): Promise<Course[]> {
+		return this.searchSimilarWithNomic(ids);
+	}
+
+	async searchSimilarWithNomic(ids: CourseId[]): Promise<Course[]> {
 		const coursesToSearchSimilar = await this.searchByIds(ids);
 
 		if (coursesToSearchSimilar.length === 0) {
 			return [];
 		}
 
-		const embeddings = await this.generateCoursesQueryEmbeddings(
+		const nomicEmbeddings = await this.generateCoursesQueryEmbeddings(
+			this.nomicEmbeddingsGenerator,
 			coursesToSearchSimilar.map((course) => course.toPrimitives()),
 		);
 
@@ -84,7 +103,33 @@ export class PostgresCourseRepository
 			FROM mooc.courses
 			WHERE id != ALL(${plainIds}::text[])
 			ORDER BY
-				(embedding <=> ${embeddings}) +
+				(embedding <=> ${nomicEmbeddings}) +
+				${recencyWeight} * EXTRACT(EPOCH FROM NOW() - published_at) / 86400
+			LIMIT 10;
+		`;
+	}
+
+	async searchSimilarWithGemma(ids: CourseId[]): Promise<Course[]> {
+		const coursesToSearchSimilar = await this.searchByIds(ids);
+
+		if (coursesToSearchSimilar.length === 0) {
+			return [];
+		}
+
+		const gemmaEmbeddings = await this.generateCoursesQueryEmbeddings(
+			this.gemmaEmbeddingsGenerator,
+			coursesToSearchSimilar.map((course) => course.toPrimitives()),
+		);
+
+		const plainIds = ids.map((id) => id.value);
+		const recencyWeight = 0.001;
+
+		return await this.searchMany`
+			SELECT id, name, summary, categories, published_at
+			FROM mooc.courses
+			WHERE id != ALL(${plainIds}::text[])
+			ORDER BY
+				(embedding_gemma <=> ${gemmaEmbeddings}) +
 				${recencyWeight} * EXTRACT(EPOCH FROM NOW() - published_at) / 86400
 			LIMIT 10;
 		`;
@@ -111,19 +156,21 @@ export class PostgresCourseRepository
 	}
 
 	private async generateCourseDocumentEmbedding(
+		generator: OllamaEmbeddings,
 		course: Primitives<Course>,
 	): Promise<string> {
-		const [vectorEmbedding] = await this.embeddingsGenerator.embedDocuments(
-			[this.serializeCourseForEmbedding(course)],
-		);
+		const [vectorEmbedding] = await generator.embedDocuments([
+			this.serializeCourseForEmbedding(course),
+		]);
 
 		return JSON.stringify(vectorEmbedding);
 	}
 
 	private async generateCoursesQueryEmbeddings(
+		generator: OllamaEmbeddings,
 		courses: Primitives<Course>[],
 	): Promise<string> {
-		const vectorEmbedding = await this.embeddingsGenerator.embedQuery(
+		const vectorEmbedding = await generator.embedQuery(
 			courses
 				.map((course) => this.serializeCourseForEmbedding(course))
 				.join("\n"),

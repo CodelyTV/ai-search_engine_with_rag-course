@@ -21,5 +21,6 @@ CREATE TABLE mooc.courses (
 	summary TEXT,
 	categories jsonb NOT NULL,
 	published_at DATE NOT NULL,
-	embedding vector(768)
+	embedding vector(768),
+	embedding_gemma vector(768)
 );
