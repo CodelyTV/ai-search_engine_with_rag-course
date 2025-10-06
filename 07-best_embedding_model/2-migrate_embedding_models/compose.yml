@@ -1,0 +1,17 @@
+services:
+  poc_postgres_pgvector:
+    image: pgvector/pgvector:0.7.4-pg16
+    restart: always
+
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: codely
+      POSTGRES_PASSWORD: c0d3ly7v
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./databases:/docker-entrypoint-initdb.d
+
+volumes:
+  db_data:
